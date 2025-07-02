@@ -1,0 +1,109 @@
+{
+  "Vivid E90": {
+    "accessories": [
+      { "id": 1, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Streaming E-series", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "WiFi Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "Vivid E-series BW printer, DC version", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "Color Laser Printer 220V", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 6, "name": "Color Laser Printer 110V", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 7, "name": "Color Video Printer", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 8, "name": "Installation for printers", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+  "Vivid E95": {
+    "accessories": [
+      { "id": 1, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Streaming E-series", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "WiFi Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "View-X", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "Vivid E-series BW printer, DC version", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 6, "name": "Color Laser Printer 220V", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 7, "name": "Color Laser Printer 110V", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 8, "name": "Color Video Printer", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 9, "name": "Installation for printers", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+  "Vivid iq": {
+    "accessories": [
+      { "id": 1, "name": "Tricefyconnectivity", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Streaming", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "Wireless USB Adapter", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "Ethernet protection cable", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "Sony UP-D898MD BW Printer kit EU", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 6, "name": "BW Printer shelf", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 7, "name": "Sony UPD25 Printer Kit Europe", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 8, "name": "Color Laser Printer 220V", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 9, "name": "Color Laser Printer 110V", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+  "Vivid S60N": {
+    "accessories": [
+  { "id": 1, "name": "DICOM Network Connectivity", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 2, "name": "Tricefy connectivity", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 3, "name": "Streaming S-series", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 4, "name": "Wi-Fi kit", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 5, "name": "USB B/W video printer v205", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 6, "name": "USB B/W printer support v205", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 7, "name": "USB color video printer", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 8, "name": "Col Laser Printer 220–240V", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 9, "name": "Col Laser Printer 100–120V", "presented": false, "appreciated": false, "wanted": false }
+]
+
+  },
+  "Vivid S70N": {
+    "accessories": [
+  { "id": 1, "name": "USB B/W video printer", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 2, "name": "USB B/W printer support", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 3, "name": "Color Video Printer", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 4, "name": "Color Laser Printer 220V", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 5, "name": "Color Laser Printer 110V", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 6, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 7, "name": "View-X", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 8, "name": "Streaming", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 9, "name": "WiFi Kit", "presented": false, "appreciated": false, "wanted": false }
+]
+
+  },
+  "Vivid S70N Dimension": {
+    "accessories": [
+  { "id": 1, "name": "USB B/W video printer", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 2, "name": "USB B/W printer support", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 3, "name": "Color Video Printer", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 4, "name": "Color Laser Printer 220V", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 5, "name": "Color Laser Printer 110V", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 6, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 7, "name": "View-X", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 8, "name": "Streaming", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 9, "name": "WiFi Kit", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 10, "name": "Tricefyconnectivity", "presented": false, "appreciated": false, "wanted": false }
+]
+
+  },
+  "Vivid T8": {
+    "accessories": [
+  { "id": 1, "name": "B/W Printer (UP-D898DC)", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 2, "name": "T-series R8 printer and DVD shelf", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 3, "name": "COLOR LASER PRINTER 220V", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 4, "name": "COLOR LASER PRINTER 110V", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 5, "name": "Streaming", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 6, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 7, "name": "Wireless USB Adapter", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 8, "name": "Ethernet protection cable", "presented": false, "appreciated": false, "wanted": false }
+]
+
+  },
+  "Vivid T9": {
+    "accessories": [
+  { "id": 1, "name": "B/W Printer (UP-D898DC)", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 2, "name": "T-series R8 printer and DVD shelf", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 3, "name": "COLOR LASER PRINTER 220V", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 4, "name": "COLOR LASER PRINTER 110V", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 5, "name": "Streaming", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 6, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 7, "name": "Wireless USB Adapter", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 8, "name": "Ethernet protection cable", "presented": false, "appreciated": false, "wanted": false }
+]
+
+}
+}
