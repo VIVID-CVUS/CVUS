@@ -410,7 +410,7 @@ function Product(): JSX.Element {
             <div className="flex justify-end space-x-4">
               <ActionButtons
                 selectedCommercial={true}
-                downloadPdf={sendExcelToCommercial}
+                downloadPdf={() => {}}
                 sendPdfToCommercial={sendPdfToCommercial}
               />
             </div>
