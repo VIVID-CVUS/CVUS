@@ -417,7 +417,7 @@ function Product(): JSX.Element {
             {/* Boutons d'action */}
             <div className="flex justify-end space-x-4">
               <ActionButtons
-                selectedCommercial={!!selectedCommercialEmails.length}
+                selectedCommercial={true}
                 downloadPdf={sendExcelToCommercial}
                 sendPdfToCommercial={sendPdfToCommercial}
               />
