@@ -19,8 +19,8 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
-  // Mot de passe en dur pour la démonstration
-  const CORRECT_PASSWORD = 'VIVID123';
+  // Mot de passe depuis les variables d'environnement
+  const CORRECT_PASSWORD = import.meta.env.AUTH_PASSWORD;
 
   const login = (password: string): boolean => {
     if (password === CORRECT_PASSWORD) {

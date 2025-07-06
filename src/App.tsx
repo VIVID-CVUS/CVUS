@@ -1,18 +1,17 @@
 // Modification du composant Product pour intégrer le EmailBodyEditor
-import { useState, useRef, ChangeEvent, JSX, useEffect } from 'react';
-import FormContainer from './components/Layout/FormContainer';
-import ProductSelect from './components/Client/ProductSelect';
-import ClientInfo from './components/Client/ClientInfo';
-import TableWithComments from './components/Tables/TableWithComments';
-import CommercialSelect from './components/Client/PeopleSelect';
-import EmailBodyEditor from './components/Client/EmailBodyEditor.tsx';
+import { ChangeEvent, JSX, useEffect, useRef, useState } from 'react';
 import ActionButtons from './components/Actions/ActionButtons';
-import { prepareData } from './services/dataService';
-import { exportToExcel, exportToPDF } from './services/dataService';
+import Login from './components/Auth/Login';
+import ClientInfo from './components/Client/ClientInfo';
+import EmailBodyEditor from './components/Client/EmailBodyEditor.tsx';
+import CommercialSelect from './components/Client/PeopleSelect';
+import ProductSelect from './components/Client/ProductSelect';
 import commerciaux from './components/data/commercials.json';
 import ia from './components/data/ia.json';
+import FormContainer from './components/Layout/FormContainer';
+import TableWithComments from './components/Tables/TableWithComments';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import Login from './components/Auth/Login';
+import { exportToExcel, exportToPDF, prepareData } from './services/dataService';
 
 // Types définitions inchangées...
 interface Sonde {
@@ -64,7 +63,7 @@ interface DeviceData {
 
 function Product(): JSX.Element {
   const formRef = useRef<HTMLFormElement>(null);
-  
+
   // Information client
   const [clientName, setClientName] = useState<string>('');
   const [clientEmail, setClientEmail] = useState<string>('');
@@ -92,9 +91,9 @@ function Product(): JSX.Element {
   // États pour les commerciaux et IAs
   const [selectedCommercialEmails, setSelectedCommercialEmails] = useState<string[]>([]);
   const [selectedIAEmails, setSelectedIAEmails] = useState<string[]>([]);
-  
+
   // État pour le corps du mail
-  const [emailBody, setEmailBody] = useState<string>(() => 
+  const [emailBody, setEmailBody] = useState<string>(() =>
     `Bonjour,\n\nVeuillez trouver ci-joint le rapport de démonstration.`
   );
 
@@ -160,6 +159,9 @@ function Product(): JSX.Element {
   const handleConnexCommentsChange = (e: ChangeEvent<HTMLTextAreaElement>): void =>
     setConnexComments(e.target.value);
 
+  // Fonctions pour les boutons d'action (restent inchangées)
+  const sendExcelToCommercial = (): void => {
+
     const data = prepareData({
       clientName,
       clientEmail,
@@ -168,7 +170,7 @@ function Product(): JSX.Element {
       selectedDevice,
       sondes: selectedSondes.map(sonde => ({
         ...sonde,
-        value: sonde.value || '', 
+        value: sonde.value || '',
         presented: sonde.presented || false,
         appreciated: sonde.appreciated || false,
         wanted: sonde.wanted || false,
@@ -176,7 +178,7 @@ function Product(): JSX.Element {
       sondesComments,
       features: softwareFeatures.map(feature => ({
         ...feature,
-        value: feature.value || '', 
+        value: feature.value || '',
         presented: feature.presented || false,
         appreciated: feature.appreciated || false,
         wanted: feature.wanted || false,
@@ -184,7 +186,7 @@ function Product(): JSX.Element {
       featuresComments,
       hardware: hardwareOptions.map(hardware => ({
         ...hardware,
-        value: hardware.value || '', 
+        value: hardware.value || '',
         presented: hardware.presented || false,
         appreciated: hardware.appreciated || false,
         wanted: hardware.wanted || false,
@@ -192,7 +194,7 @@ function Product(): JSX.Element {
       hardwareComments,
       connex: connexOptions.map(connex => ({
         ...connex,
-        value: connex.value || '', 
+        value: connex.value || '',
         presented: connex.presented || false,
         appreciated: connex.appreciated || false,
         wanted: connex.wanted || false,
@@ -400,7 +402,7 @@ function Product(): JSX.Element {
 
             {/* Corps du mail */}
             <div className="bg-white shadow-lg rounded-lg p-6">
-              <EmailBodyEditor 
+              <EmailBodyEditor
                 emailBody={emailBody}
                 setEmailBody={setEmailBody}
               />
@@ -409,8 +411,8 @@ function Product(): JSX.Element {
             {/* Boutons d'action */}
             <div className="flex justify-end space-x-4">
               <ActionButtons
-                selectedCommercial={true}
-                downloadPdf={() => {}}
+                selectedCommercial={!!selectedCommercialEmails.length}
+                downloadPdf={sendExcelToCommercial}
                 sendPdfToCommercial={sendPdfToCommercial}
               />
             </div>
