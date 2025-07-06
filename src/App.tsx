@@ -160,14 +160,6 @@ function Product(): JSX.Element {
   const handleConnexCommentsChange = (e: ChangeEvent<HTMLTextAreaElement>): void =>
     setConnexComments(e.target.value);
 
-  // Fonctions pour les boutons d'action (restent inchangées)
-  const sendExcelToCommercial = (): void => {
-    // Implementation identique...
-    if (!selectedCommercialEmails.length) {
-      alert("Veuillez sélectionner un commercial avant d'envoyer l'Excel.");
-      return;
-    }
-
     const data = prepareData({
       clientName,
       clientEmail,
