@@ -206,7 +206,7 @@
   { "id": 14, "name": "C2-9-RS", "presented": false, "appreciated": false, "wanted": false },
   { "id": 15, "name": "E8C-RS", "presented": false, "appreciated": false, "wanted": false },
   { "id": 16, "name": "6Tc-RS", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 17, "name": "Vscan Air CL", "presented": false, "appreciated": false, "wanted": false }
+  { "id": 17, "name": "Vscan Air CL", "presented": false, "appreciated": false, "wanted": false },
   { "id": 18, "name": "Vscan Air SL", "presented": false, "appreciated": false, "wanted": false }
 ]
   },
@@ -227,7 +227,7 @@
   { "id": 12, "name": "8C-RS", "presented": false, "appreciated": false, "wanted": false },
   { "id": 13, "name": "E8C-RS", "presented": false, "appreciated": false, "wanted": false },
   { "id": 14, "name": "6Tc-RS", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 15, "name": "Vscan Air CL", "presented": false, "appreciated": false, "wanted": false }
+  { "id": 15, "name": "Vscan Air CL", "presented": false, "appreciated": false, "wanted": false },
   { "id": 16, "name": "Vscan Air SL", "presented": false, "appreciated": false, "wanted": false }
 ]
   },
@@ -246,14 +246,14 @@
   { "id": 10, "name": "8C-RS", "presented": false, "appreciated": false, "wanted": false },
   { "id": 11, "name": "E8C-RS", "presented": false, "appreciated": false, "wanted": false },
   { "id": 12, "name": "6Tc-RS", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 13, "name": "Vscan Air CL", "presented": false, "appreciated": false, "wanted": false }
+  { "id": 13, "name": "Vscan Air CL", "presented": false, "appreciated": false, "wanted": false },
   { "id": 14, "name": "Vscan Air SL", "presented": false, "appreciated": false, "wanted": false }
 ]
   },
   
    "Venue Sprint": {
     "sondes": [
-  { "id": 1, "name": "Vscan Air CL", "presented": false, "appreciated": false, "wanted": false }
+  { "id": 1, "name": "Vscan Air CL", "presented": false, "appreciated": false, "wanted": false },
   { "id": 2, "name": "Vscan Air SL", "presented": false, "appreciated": false, "wanted": false }
 ]
   }
