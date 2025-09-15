@@ -105,5 +105,41 @@
   { "id": 8, "name": "Ethernet protection cable", "presented": false, "appreciated": false, "wanted": false }
 ]
 
-}
+},
+    "Venue": {
+    "accessories": [
+  { "id": 1, "name": "Wifi", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 2, "name": "DICOM", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 3, "name": "ECG", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 4, "name": "Imprimante", "presented": false, "appreciated": false, "wanted": false },
+]
+
+  },
+  "Venue Go": {
+    "accessories": [
+  { "id": 1, "name": "Wifi", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 2, "name": "DICOM", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 3, "name": "ECG", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 4, "name": "Imprimante", "presented": false, "appreciated": false, "wanted": false },
+]
+
+  },
+    "Venue Fit": {
+    "accessories": [
+  { "id": 1, "name": "Wifi", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 2, "name": "DICOM", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 3, "name": "ECG", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 4, "name": "Imprimante", "presented": false, "appreciated": false, "wanted": false },
+]
+
+  },
+    "Venue Sprint": {
+    "accessories": [
+  { "id": 1, "name": "Wifi", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 2, "name": "DICOM", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 3, "name": "ECG", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 4, "name": "Imprimante", "presented": false, "appreciated": false, "wanted": false },
+]
+
+  }
 }
