@@ -133,10 +133,10 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
             <option value="Vivid S60N">Vivid S60N</option>
             <option value="Vivid T9">Vivid T9</option>
             <option value="Vivid T8">Vivid T8</option>
-            <option value="Vivid T8">Venue</option>
-            <option value="Vivid T8">Venue Go</option>
-            <option value="Vivid T8">Venue Fit</option>
-            <option value="Vivid T8">Venue Sprint</option>
+            <option value="Venue">Venue</option>
+            <option value="Venue Go">Venue Go</option>
+            <option value="Venue Fit">Venue Fit</option>
+            <option value="Venue Sprint">Venue Sprint</option>
           </select>
         </div>
       </div>
