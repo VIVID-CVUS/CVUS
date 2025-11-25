@@ -36,8 +36,8 @@
   },
   {
     "id": "8",
-    "name": "Theo SEDE",
-    "email": "theo.sede1@gehealthcare.com"
+    "name": "Benjamin BREUILLER",
+    "email": "Benjamin.breuiller@gehealthcare.com"
   },
   {
     "id": "9",
@@ -63,5 +63,10 @@
   {
     "name": "Dieudonne MOMO TAMOGOU",
     "email": "dieudonne.momotamogou@gehealthcare.com"
+  }
+  ,
+  {
+    "name": "Francis FAVERJON",
+    "email": "Francis.faverjon@gehealthcare.com"
   }
 ]
