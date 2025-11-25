@@ -103,7 +103,7 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
   return (
     <div className="mb-6 bg-white rounded-lg shadow p-4">
       <div className="flex items-center">
-        <div className="w-1/3 bg-purple-800 text-white font-bold p-3 rounded-l-lg text-center">
+        <div className="w-2/3 bg-purple-800 text-white font-bold p-3 rounded-l-lg text-center">
           Choix du produit :
         </div>
         <div className="w-2/3 bg-gray-100 p-3 rounded-r-lg flex items-center">
