@@ -1,5 +1,21 @@
+interface MedecinsTableProps {
+  promoteur: string;
+  setPromoteur: (v: string) => void;
+  detracteur: string;
+  setDetracteur: (v: string) => void;
+  indecis: string;
+  setIndecis: (v: string) => void;
+}
 
-export default function MedecinsTable() {
+export default function MedecinsTable({
+  promoteur,
+  setPromoteur,
+  detracteur,
+  setDetracteur,
+  indecis,
+  setIndecis
+}: MedecinsTableProps) {
+
   return (
     <div className="bg-white p-4 rounded-lg shadow mb-6">
       <h2 className="text-lg font-bold text-purple-800 mb-4">
@@ -18,21 +34,24 @@ export default function MedecinsTable() {
           Médecin indécis
         </div>
 
-        {/* Champs libres */}
+        {/* Valeurs */}
         <textarea
-          className="border border-gray-300 p-3 rounded w-full h-24 focus:outline-none focus:ring-2 focus:ring-purple-600 resize-none"
-          placeholder="Commentaires promoteur..."
-        ></textarea>
+          className="border border-gray-300 p-3 rounded w-full h-24 focus:ring-2 focus:ring-purple-600 resize-none"
+          value={promoteur}
+          onChange={(e) => setPromoteur(e.target.value)}
+        />
 
         <textarea
-          className="border border-gray-300 p-3 rounded w-full h-24 focus:outline-none focus:ring-2 focus:ring-purple-600 resize-none"
-          placeholder="Commentaires détracteur..."
-        ></textarea>
+          className="border border-gray-300 p-3 rounded w-full h-24 focus:ring-2 focus:ring-purple-600 resize-none"
+          value={detracteur}
+          onChange={(e) => setDetracteur(e.target.value)}
+        />
 
         <textarea
-          className="border border-gray-300 p-3 rounded w-full h-24 focus:outline-none focus:ring-2 focus:ring-purple-600 resize-none"
-          placeholder="Commentaires indécis..."
-        ></textarea>
+          className="border border-gray-300 p-3 rounded w-full h-24 focus:ring-2 focus:ring-purple-600 resize-none"
+          value={indecis}
+          onChange={(e) => setIndecis(e.target.value)}
+        />
       </div>
     </div>
   );
