@@ -171,7 +171,8 @@ export const prepareData = ({
     selectedIAs: selectedIAEmails,
     selectedCommercialEmails,
     selectedIAEmails,
-    emailBody
+    emailBody,
+    medecins,
   };
 };
 
