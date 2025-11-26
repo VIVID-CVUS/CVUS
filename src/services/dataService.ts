@@ -52,6 +52,11 @@ type PreparedData = {
   emailBody: string;
   selectedCommercialEmails: string[];
   selectedIAEmails: string[];
+  medecins: {
+    promoteur: string;
+    detracteur: string;
+    indecis: string;
+  };
 };
 
 // Define jsPDF internal type extension
@@ -108,6 +113,11 @@ type PrepareDataParams = {
   commerciaux: Commercial[];
   selectedIAEmails: string[];
   emailBody: string;
+   medecins: {
+    promoteur: string;
+    detracteur: string;
+    indecis: string;
+  };
 };
 
 // Fonction pour préparer les données avant export
