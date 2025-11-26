@@ -138,7 +138,8 @@ export const prepareData = ({
   selectedCommercialEmails,
   commerciaux,
   selectedIAEmails,
-  emailBody
+  emailBody,
+  medecins
 }: PrepareDataParams): PreparedData => {
   // Find the selected commercial or set to null if not found
   const selectedCommercialObj = commerciaux.find((c) => c.email === selectedCommercialEmails[0]) || null;
