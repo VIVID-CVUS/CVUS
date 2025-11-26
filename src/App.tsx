@@ -258,7 +258,12 @@ function Product(): JSX.Element {
       selectedCommercialEmails,
       commerciaux,
       selectedIAEmails,
-      emailBody
+      emailBody,
+      medecins: {
+    promoteur: promoteurNotes,
+    detracteur: detracteurNotes,
+    indecis: indecisNotes,
+  }
     });
 
     if (formRef.current) {
