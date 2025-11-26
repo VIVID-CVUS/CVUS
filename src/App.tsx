@@ -208,7 +208,12 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
       selectedCommercialEmails,
       commerciaux,
       selectedIAEmails,
-      emailBody
+      emailBody,
+      medecins: {
+  promoteur: promoteurNotes,
+  detracteur: detracteurNotes,
+  indecis: indecisNotes,
+},
     });
 
     exportToExcel(data);
