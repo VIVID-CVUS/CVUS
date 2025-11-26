@@ -324,7 +324,14 @@ function Product(): JSX.Element {
         setDemoDate={setDemoDate}
         setGeneralRemarks={setGeneralRemarks}
       />
-      <MedecinsTable />
+      <MedecinsTable
+  promoteur={promoteurNotes}
+  setPromoteur={setPromoteurNotes}
+  detracteur={detracteurNotes}
+  setDetracteur={setDetracteurNotes}
+  indecis={indecisNotes}
+  setIndecis={setIndecisNotes}
+/>
       <ProductSelect
         selectedDevice={selectedDevice}
         setSelectedDevice={setSelectedDevice}
