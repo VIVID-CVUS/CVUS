@@ -12,7 +12,7 @@ import FormContainer from './components/Layout/FormContainer';
 import TableWithComments from './components/Tables/TableWithComments';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { exportToExcel, exportToPDF, prepareData } from './services/dataService';
-import MedecinsTable from "./components/Client/MedecinsTable";
+import MedecinsTable from './components/Client/MedecinsTable';
 
 // Types définitions inchangées...
 interface Sonde {
