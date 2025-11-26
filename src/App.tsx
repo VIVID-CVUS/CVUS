@@ -71,6 +71,10 @@ function Product(): JSX.Element {
   const [demoDate, setDemoDate] = useState<string>('');
   const [generalRemarks, setGeneralRemarks] = useState<string>('');
 
+  // Avis client 
+  const [promoteurNotes, setPromoteurNotes] = useState<string>("");
+const [detracteurNotes, setDetracteurNotes] = useState<string>("");
+const [indecisNotes, setIndecisNotes] = useState<string>("");
   // États pour les dispositifs
   const [selectedDevice, setSelectedDevice] = useState<string>('');
   const setSondes = useState<Sonde[]>([])[1];
