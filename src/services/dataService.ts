@@ -192,27 +192,25 @@ export const exportToExcel = (data: PreparedData) => {
     pdf.setFillColor(87, 41, 139);
     pdf.rect(0, 0, 210, 35, 'F');
 
-    // 2️⃣ Logo GE Healthcare
-    //    si logoPng est une URL, convertissez-le en base64 avant (ex: fetch -> blob -> FileReader)
-    //    ici on suppose logoPng est déjà une data:URL "data:image/png;base64,...."
+    // 2️⃣ Logo GE Healthcare à gauche
     const logoWidth = 40;   // largeur en mm
     const logoHeight = 10;  // hauteur en mm, ajustez selon votre image
-    pdf.addImage(logoPng, 'PNG', 10, 10, logoWidth, logoHeight);
+    pdf.addImage(logoPng, 'PNG', 5, 5, logoWidth, logoHeight);
 
-    // 3️⃣ Titre de la démo, centré
+    // 3️⃣ Titre de la démo, centré verticalement dans le bandeau
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(18);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(`Démonstration ${data.selectedDevice}`, 105, 15, { align: 'center' });
+    pdf.text(`Démonstration ${data.selectedDevice}`, 105, 16, { align: 'center' });
 
-    // 4️⃣ Info client et date
+    // 4️⃣ Info client et date (sous le bandeau)
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`Client: ${data.clientInfo.name}`, 105, 22, { align: 'center' });
+    pdf.text(`Client: ${data.clientInfo.name}`, 105, 24, { align: 'center' });
     pdf.text(
       `Date: ${data.clientInfo.demoDate || new Date().toLocaleDateString()}`,
       105,
-      29,
+      31,
       { align: 'center' }
     );
   };
@@ -240,13 +238,14 @@ export const exportToExcel = (data: PreparedData) => {
   const drawTable = (headers: string[], rows: any[][], startY: number, maxY: number = 270) => {
     const cellPadding = 3;
     const fontSize = 9;
-    // const lineHeight = fontSize * 0.5;
-    const colWidths = [80, 30, 30, 30]; // Ajustez selon vos besoins
+    // Largeur totale 180mm, aligné à 15mm
+    const colCount = headers.length;
+    const colWidths = Array(colCount).fill(Math.floor(180 / colCount));
     let y = startY;
 
     // En-têtes du tableau
     pdf.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
-    pdf.rect(15, y, colWidths.reduce((a, b) => a + b, 0), 8, 'F');
+    pdf.rect(15, y, 180, 8, 'F');
 
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(fontSize);
@@ -275,7 +274,7 @@ export const exportToExcel = (data: PreparedData) => {
         y = 40;
         // Redessiner les en-têtes du tableau
         pdf.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
-        pdf.rect(15, y, colWidths.reduce((a, b) => a + b, 0), 8, 'F');
+        pdf.rect(15, y, 180, 8, 'F');
 
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(fontSize);
@@ -297,7 +296,7 @@ export const exportToExcel = (data: PreparedData) => {
       } else {
         pdf.setFillColor(255, 255, 255);
       }
-      pdf.rect(15, y, colWidths.reduce((a, b) => a + b, 0), 7, 'F');
+      pdf.rect(15, y, 180, 7, 'F');
 
       // Texte des cellules
       pdf.setTextColor(50, 50, 50);
@@ -344,12 +343,106 @@ export const exportToExcel = (data: PreparedData) => {
   const clientInfoTable = [
     ['Nom du client', data.clientInfo.name || 'Non spécifié'],
     ['Email', data.clientInfo.email || 'Non spécifié'],
-    ['Date de démonstration', data.clientInfo.demoDate || 'Non spécifiée'],
-    ['Remarques générales', data.clientInfo.generalRemarks || 'Aucune']
+    ['Date de démonstration', data.clientInfo.demoDate || 'Non spécifiée']
   ];
+  // Largeur du tableau informations client = 180mm, aligné à 15mm
+  const infoHeaders = ['Information', 'Détail'];
+  const infoColWidths = [90, 90];
+  // En-tête violet
+  pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  pdf.rect(15, yPosition, 180, 8, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  let xInfo = 15;
+  infoHeaders.forEach((header, i) => {
+    pdf.text(header, xInfo + 3, yPosition + 5);
+    xInfo += infoColWidths[i];
+  });
+  yPosition += 8;
+  // Lignes infos
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(50, 50, 50);
+  clientInfoTable.forEach((row, idx) => {
+    pdf.setFillColor(idx % 2 === 0 ? 245 : 245, 245, 245);
+    pdf.rect(15, yPosition, 180, 8, 'F');
+    pdf.text(row[0], 18, yPosition + 5);
+    pdf.text(row[1], 105, yPosition + 5);
+    yPosition += 8;
+  });
 
-  yPosition = drawTable(['Information', 'Détail'], clientInfoTable, yPosition);
-  yPosition += 10;
+  // Séparation blanche juste après le tableau infos client
+  pdf.setFillColor(255, 255, 255);
+  pdf.rect(15, yPosition, 180, 8, 'F');
+  yPosition += 8;
+
+  // Tableau médecins
+  // Tableau horizontal "Avis des médecins"
+  const avisHeaders = ['Promoteur', 'Rétracteur', 'Indécis'];
+  const avisRow = [
+    data.medecins.promoteur || 'Aucun',
+    data.medecins.detracteur || 'Aucun',
+    data.medecins.indecis || 'Aucun'
+  ];
+  // Largeur totale 180mm, 3 colonnes égales
+  const avisColWidths = [60, 60, 60]; // total 180mm, aligné avec le tableau client
+  // Calculer la hauteur max nécessaire
+  const avisLinesArr = avisRow.map((avis, i) => pdf.splitTextToSize(avis, avisColWidths[i] - 6));
+  const maxAvisHeight = Math.max(...avisLinesArr.map(lines => lines.length * 5 + 8));
+  // En-tête violet
+  pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  pdf.rect(15, yPosition, 180, 8, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  let xAvis = 15;
+  avisHeaders.forEach((header, i) => {
+    pdf.text(header, xAvis + 3, yPosition + 5);
+    xAvis += avisColWidths[i];
+  });
+  yPosition += 8;
+  // Ligne d'avis, hauteur max
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(50, 50, 50);
+  let xAvisVal = 15;
+  avisLinesArr.forEach((avisLines, i) => {
+    // Promoteur et Indécis : gris, Rétracteur : blanc
+    if (i === 1) {
+      pdf.setFillColor(255, 255, 255); // Rétracteur en blanc
+    } else {
+      pdf.setFillColor(245, 245, 245); // Autres en gris
+    }
+    pdf.rect(xAvisVal, yPosition, avisColWidths[i], maxAvisHeight, 'F');
+    pdf.text(avisLines, xAvisVal + 3, yPosition + 6);
+    xAvisVal += avisColWidths[i];
+  });
+  yPosition += maxAvisHeight;
+
+  // Séparation blanche
+  pdf.setFillColor(255, 255, 255);
+  pdf.rect(15, yPosition, 180, 8, 'F');
+  yPosition += 8;
+  // Remarques générales en zone grise
+  yPosition += 5;
+  pdf.setFillColor(245, 245, 245);
+  const remarquesText = data.clientInfo.generalRemarks || 'Aucune';
+  const remarquesLines = pdf.splitTextToSize(remarquesText, 170);
+  const remarquesHeight = remarquesLines.length * 5 + 10;
+  pdf.rect(15, yPosition, 180, remarquesHeight, 'F');
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(50, 50, 50);
+  pdf.setFontSize(10);
+  pdf.text('Remarques générales', 20, yPosition + 5);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(80, 80, 80);
+  pdf.setFontSize(9);
+  pdf.text(remarquesLines, 20, yPosition + 12);
+  yPosition += remarquesHeight + 5;
+
+  // Ajout d'un espace blanc avant le bandeau Sondes
+  pdf.setFillColor(255, 255, 255);
+  pdf.rect(15, yPosition, 180, 8, 'F');
+  yPosition += 8;
 
   // Sondes
   yPosition = drawSectionTitle('Sondes', yPosition);
@@ -455,6 +548,9 @@ export const exportToExcel = (data: PreparedData) => {
   yPosition = drawTable(connexHeaders, connexRows, yPosition);
   yPosition = addCommentBox(data.connex.comments, yPosition);
   yPosition += 15;
+
+  // Section Médecins
+    // ...le tableau médecins est déjà affiché plus haut, on retire la redéclaration...
 
   // Informations commercial
   // pdf.setFillColor(accentColor[0], accentColor[1], accentColor[2], 0.1);
@@ -660,12 +756,30 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
     const clientInfoTable = [
       ['Nom du client', data.clientInfo.name || 'Non spécifié'],
       ['Email', data.clientInfo.email || 'Non spécifié'],
-      ['Date de démonstration', data.clientInfo.demoDate || 'Non spécifiée'],
-      ['Remarques générales', data.clientInfo.generalRemarks || 'Aucune']
+      ['Date de démonstration', data.clientInfo.demoDate || 'Non spécifiée']
     ];
 
     yPosition = drawTable(['Information', 'Détail'], clientInfoTable, yPosition);
-    yPosition += 10;
+    
+    // Remarques générales avec hauteur dynamique
+    yPosition += 5;
+    pdf.setFillColor(245, 245, 245);
+    const remarquesText = data.clientInfo.generalRemarks || 'Aucune';
+    const remarquesLines = pdf.splitTextToSize(remarquesText, 170);
+    const remarquesHeight = remarquesLines.length * 5 + 10;
+    pdf.rect(15, yPosition, 180, remarquesHeight, 'F');
+    
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(50, 50, 50);
+    pdf.setFontSize(10);
+    pdf.text('Remarques générales', 20, yPosition + 5);
+    
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(80, 80, 80);
+    pdf.setFontSize(9);
+    pdf.text(remarquesLines, 20, yPosition + 12);
+    
+    yPosition += remarquesHeight + 10; // Ajoute un espace blanc supplémentaire (5 de plus)
 
     // Sondes
     yPosition = drawSectionTitle('Sondes', yPosition);
@@ -771,6 +885,115 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
     yPosition = drawTable(connexHeaders, connexRows, yPosition);
     yPosition = addCommentBox(data.connex.comments, yPosition);
     yPosition += 15;
+
+    // Vérifier si on a besoin d'une nouvelle page pour les médecins
+    if (yPosition > 200) {
+      drawFooter(pdf.internal.getNumberOfPages());
+      pdf.addPage();
+      drawHeader();
+      yPosition = 45;
+    }
+
+    // Section Médecins
+    yPosition = drawSectionTitle('Médecins et Responsables', yPosition);
+
+    pdf.setTextColor(50, 50, 50);
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+
+
+      // Remarques générales en zone grise
+      yPosition += 5;
+      // Sous-titre violet "Remarques générales"
+      pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      pdf.rect(15, yPosition, 180, 10, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Remarques générales', 20, yPosition + 7);
+      yPosition += 12;
+      // Zone grise
+      pdf.setFillColor(245, 245, 245);
+      pdf.rect(15, yPosition, 180, remarquesHeight || 10, 'F');
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(80, 80, 80);
+      pdf.setFontSize(9);
+      pdf.text(remarquesLines, 20, yPosition + 8);
+      yPosition += (remarquesHeight || 10);
+
+      // Séparation blanche juste après la zone remarques générales
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(15, yPosition, 180, 8, 'F');
+      yPosition += 8;
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(15, yPosition, 180, 8, 'F');
+      yPosition += 8;
+
+      // Titre violet "Avis des médecins"
+      pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      pdf.rect(15, yPosition, 180, 10, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Avis des médecins', 20, yPosition + 7);
+      yPosition += 12;
+
+      // Tableau horizontal "Avis des médecins"
+      const avisHeaders = ['Promoteur', 'Rétracteur', 'Indécis'];
+      const avisRow = [
+        data.medecins.promoteur || 'Aucun',
+        data.medecins.detracteur || 'Aucun',
+        data.medecins.indecis || 'Aucun'
+      ];
+      // Largeur totale 180mm, 3 colonnes égales
+      const avisColWidths = [60, 60, 60];
+      // Calculer la hauteur max nécessaire
+      const avisLinesArr = avisRow.map((avis, i) => pdf.splitTextToSize(avis, avisColWidths[i] - 6));
+      const maxAvisHeight = Math.max(...avisLinesArr.map(lines => lines.length * 5 + 8));
+      // En-tête violet
+      pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      pdf.rect(15, yPosition, 180, 8, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'bold');
+      let xAvis = 15;
+      avisHeaders.forEach((header, i) => {
+        pdf.text(header, xAvis + 3, yPosition + 5);
+        xAvis += avisColWidths[i];
+      });
+      yPosition += 8;
+      // Ligne d'avis, hauteur max
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(50, 50, 50);
+      let xAvisVal = 15;
+      avisLinesArr.forEach((avisLines, i) => {
+        pdf.setFillColor(i % 2 === 0 ? 245 : 235, 245, 245);
+        pdf.rect(xAvisVal, yPosition, avisColWidths[i], maxAvisHeight, 'F');
+        pdf.text(avisLines, xAvisVal + 3, yPosition + 6);
+        xAvisVal += avisColWidths[i];
+      });
+      yPosition += maxAvisHeight;
+    
+    // yPosition += detracteurHeight + 5; // Removed undefined variable, already handled by maxAvisHeight above
+
+    // Indécis
+    pdf.setFillColor(245, 245, 245);
+    const indecisText = data.medecins.indecis || 'Aucun';
+    const indecisLines = pdf.splitTextToSize(indecisText, 170);
+    const indecisHeight = indecisLines.length * 5 + 10;
+    pdf.rect(15, yPosition, 180, indecisHeight, 'F');
+    
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(50, 50, 50);
+    pdf.setFontSize(10);
+    pdf.text('Indécis', 20, yPosition + 5);
+    
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(80, 80, 80);
+    pdf.setFontSize(9);
+    pdf.text(indecisLines, 20, yPosition + 12);
+    
+    yPosition += indecisHeight + 15;
 
     // Ajouter le footer à la dernière page
     drawFooter(pdf.internal.getNumberOfPages());

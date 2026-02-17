@@ -1,5 +1,7 @@
 // Modification du composant Product pour intégrer le EmailBodyEditor
 import { ChangeEvent, JSX, useEffect, useRef, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import TestPage from './components/TestPage';
 import ActionButtons from './components/Actions/ActionButtons';
 import Login from './components/Auth/Login';
 import ClientInfo from './components/Client/ClientInfo';
@@ -475,7 +477,16 @@ function ProductWithAuth(): JSX.Element {
 export default function App(): JSX.Element {
   return (
     <AuthProvider>
-      <ProductWithAuth />
+      <Router>
+        <nav className="p-4 bg-gray-200 flex gap-4">
+          <Link to="/">Accueil</Link>
+          <Link to="/test">Page de test</Link>
+        </nav>
+        <Routes>
+          <Route path="/" element={<ProductWithAuth />} />
+          <Route path="/test" element={<TestPage />} />
+        </Routes>
+      </Router>
     </AuthProvider>
   );
 }

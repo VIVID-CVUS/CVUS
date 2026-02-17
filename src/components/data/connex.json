@@ -1,14 +1,37 @@
 {
+  "Vivid Pioneer 4D": {
+    "accessories": [
+      { "id": 1, "name": "ECG cable and adaptor", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "WiFi Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "BW Printer Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "BW printer paper", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+  "Vivid Pioneer interventional": {
+    "accessories": [
+      { "id": 1, "name": "ECG cable and adaptor", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "WiFi Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "BW Printer Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "BW printer paper", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+  "Vivid Pioneer 2D": {
+    "accessories": [
+      { "id": 1, "name": "ECG cable and adaptor", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "WiFi Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "BW Printer Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "BW printer paper", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
   "Vivid E90": {
     "accessories": [
-      { "id": 1, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 2, "name": "Streaming E-series", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 1, "name": "ECG cable and adaptor", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
       { "id": 3, "name": "WiFi Kit", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 4, "name": "Vivid E-series BW printer, DC version", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 5, "name": "Color Laser Printer 220V", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 6, "name": "Color Laser Printer 110V", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 7, "name": "Color Video Printer", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 8, "name": "Installation for printers", "presented": false, "appreciated": false, "wanted": false }
+      { "id": 4, "name": "BW Printer Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "BW printer paper", "presented": false, "appreciated": false, "wanted": false }
     ]
   },
   "Vivid E95": {
@@ -140,6 +163,5 @@
   { "id": 3, "name": "ECG", "presented": false, "appreciated": false, "wanted": false },
   { "id": 4, "name": "Imprimante", "presented": false, "appreciated": false, "wanted": false }
 ]
-
-  }
+}
 }

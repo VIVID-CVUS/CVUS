@@ -7,7 +7,28 @@
       { "id": 4, "name": "Vivid Exx DVD Option ComExpress", "presented": false, "appreciated": false, "wanted": false },
       { "id": 5, "name": "Adapter for Pressure Xducer", "presented": false, "appreciated": false, "wanted": false },
       { "id": 6, "name": "Adapter for MA-300 Heart Sound microphone", "presented": false, "appreciated": false, "wanted": false }
-    ]
+       ]
+  },
+    "Vivid Pioneer 4D": {
+      "hardware": [
+        { "id": 1, "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
+        { "id": 2, "name": "DVDRW drive", "presented": false, "appreciated": false, "wanted": false },
+        { "id": 3, "name": "Footswitch", "presented": false, "appreciated": false, "wanted": false }
+      ]
+  },
+      "Vivid Pioneer interventional": {
+      "hardware": [
+        { "id": 1, "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
+        { "id": 2, "name": "DVDRW drive", "presented": false, "appreciated": false, "wanted": false },
+        { "id": 3, "name": "Footswitch", "presented": false, "appreciated": false, "wanted": false }
+      ]
+  },
+        "Vivid Pioneer 2D": {
+      "hardware": [
+        { "id": 1, "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
+        { "id": 2, "name": "DVDRW drive", "presented": false, "appreciated": false, "wanted": false },
+        { "id": 3, "name": "Footswitch", "presented": false, "appreciated": false, "wanted": false }
+      ]
   },
   "Vivid E95": {
     "hardware": [
