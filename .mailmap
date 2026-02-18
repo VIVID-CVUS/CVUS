@@ -1,0 +1,6 @@
+# Git mailmap file
+# Maps commit author emails to proper GitHub identities
+# Format: Proper Name <proper@email.com> <commit@email.com>
+
+# Map the placeholder email to the Copilot bot email
+copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com> <you@example.com>
