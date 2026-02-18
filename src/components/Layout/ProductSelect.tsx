@@ -103,10 +103,10 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
 
     // Récupérer les données des fichiers JSON en fonction du dispositif
     const deviceData: DeviceData = {
-      sondes: sondesData[device],
-      features: featuresData[device],
-      hardware: hardwareData[device],
-      connex: softwareData[device]
+      sondes: sondesData[device]?.sondes,
+      features: featuresData[device]?.features,
+      hardware: hardwareData[device]?.hardware,
+      connex: softwareData[device]?.accessories
     };
 
     updateDataStates(deviceData);

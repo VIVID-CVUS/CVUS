@@ -74,10 +74,10 @@ interface PDFInternal {
   getEncryptor: (objectId: number) => (data: string) => string;
 }
 
-// Fixed ExtendedJsPDF interface
-interface ExtendedJsPDF extends jsPDF {
+// Fixed ExtendedJsPDF type
+type ExtendedJsPDF = jsPDF & {
   internal: PDFInternal;
-}
+};
 
 // Fonction de traitement des données des sections (sondes, features, etc.)
 export const processSectionData = (
@@ -302,7 +302,9 @@ export const exportToExcel = (data: PreparedData) => {
       pdf.setTextColor(50, 50, 50);
       let xPos = 15;
       rows[i].forEach((cell: string | number | boolean | undefined, idx: number) => {
-        pdf.text(cell.toString(), xPos + cellPadding, y + 5);
+        if (cell !== undefined) {
+          pdf.text(cell.toString(), xPos + cellPadding, y + 5);
+        }
         xPos += colWidths[idx];
       });
 
@@ -715,7 +717,9 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
         pdf.setTextColor(50, 50, 50);
         let xPos = 15;
         rows[i].forEach((cell: string | number | boolean | undefined, idx: number) => {
-          pdf.text(cell.toString(), xPos + cellPadding, y + 5);
+          if (cell !== undefined) {
+            pdf.text(cell.toString(), xPos + cellPadding, y + 5);
+          }
           xPos += colWidths[idx];
         });
 
