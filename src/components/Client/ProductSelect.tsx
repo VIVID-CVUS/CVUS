@@ -60,32 +60,48 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
   setSelectedDevice,
   updateDataStates,
 }) => {
-    const handleDeviceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleDeviceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const device = e.target.value;
       setSelectedDevice(device);
 
       const sondesRaw = (sondesDataRaw as Record<string, { sondes: Partial<Sonde>[] }>)[device]?.sondes || [];
       const deviceSondes: Sonde[] = sondesRaw.map((s) => ({
-        ...s,
         id: String(s.id),
+        name: s.name || '',
+        description: s.description,
+        presented: s.presented,
+        appreciated: s.appreciated,
+        wanted: s.wanted,
       }));
 
       const deviceFeatures = (featuresDataRaw as Record<string, { features : Partial<Feature>[] }>)[device]?.features || [];
       const deviceFeature : Feature [] = deviceFeatures.map((s) => ({
-        ...s,
         id: String(s.id),
+        name: s.name || '',
+        description: s.description,
+        presented: s.presented,
+        appreciated: s.appreciated,
+        wanted: s.wanted,
       }));
 
       const deviceHardwares = (hardwareDataRaw as Record<string, { hardware : Partial<Hardware>[] }>)[device]?.hardware || [];
       const deviceHardware : Hardware [] = deviceHardwares.map((s) => ({
-        ...s,
         id: String(s.id),
+        name: s.name || '',
+        description: s.description,
+        presented: s.presented,
+        appreciated: s.appreciated,
+        wanted: s.wanted,
       }));
 
       const deviceConnexs = (softwareDataRaw as Record<string, { accessories : Partial<Connex>[] }>)[device]?.accessories || [];
       const deviceConnex : Connex [] = deviceConnexs.map((s) => ({
-        ...s,
         id: String(s.id),
+        name: s.name || '',
+        description: s.description,
+        presented: s.presented,
+        appreciated: s.appreciated,
+        wanted: s.wanted,
       }));
 
       const deviceData: DeviceData = {

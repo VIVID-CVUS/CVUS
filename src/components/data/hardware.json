@@ -1,111 +1,111 @@
 {
   "Vivid E90": {
     "hardware": [
-      { "id": 1, "name": "UPS 220–240V 50/60Hz", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 2, "name": "E-Series UPS Support Kit", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 3, "name": "Tripedal footswitch", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 4, "name": "Vivid Exx DVD Option ComExpress", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 5, "name": "Adapter for Pressure Xducer", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 6, "name": "Adapter for MA-300 Heart Sound microphone", "presented": false, "appreciated": false, "wanted": false }
+      { "id": "1", "name": "UPS 220–240V 50/60Hz", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "2", "name": "E-Series UPS Support Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "3", "name": "Tripedal footswitch", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "4", "name": "Vivid Exx DVD Option ComExpress", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "5", "name": "Adapter for Pressure Xducer", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "6", "name": "Adapter for MA-300 Heart Sound microphone", "presented": false, "appreciated": false, "wanted": false }
        ]
   },
     "Vivid Pioneer 4D": {
       "hardware": [
-        { "id": 1, "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
-        { "id": 2, "name": "DVDRW drive", "presented": false, "appreciated": false, "wanted": false },
-        { "id": 3, "name": "Footswitch", "presented": false, "appreciated": false, "wanted": false }
+        { "id": "1", "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
+        { "id": "2", "name": "DVDRW drive", "presented": false, "appreciated": false, "wanted": false },
+        { "id": "3", "name": "Footswitch", "presented": false, "appreciated": false, "wanted": false }
       ]
   },
       "Vivid Pioneer interventional": {
       "hardware": [
-        { "id": 1, "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
-        { "id": 2, "name": "DVDRW drive", "presented": false, "appreciated": false, "wanted": false },
-        { "id": 3, "name": "Footswitch", "presented": false, "appreciated": false, "wanted": false }
+        { "id": "1", "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
+        { "id": "2", "name": "DVDRW drive", "presented": false, "appreciated": false, "wanted": false },
+        { "id": "3", "name": "Footswitch", "presented": false, "appreciated": false, "wanted": false }
       ]
   },
         "Vivid Pioneer 2D": {
       "hardware": [
-        { "id": 1, "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
-        { "id": 2, "name": "DVDRW drive", "presented": false, "appreciated": false, "wanted": false },
-        { "id": 3, "name": "Footswitch", "presented": false, "appreciated": false, "wanted": false }
+        { "id": "1", "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
+        { "id": "2", "name": "DVDRW drive", "presented": false, "appreciated": false, "wanted": false },
+        { "id": "3", "name": "Footswitch", "presented": false, "appreciated": false, "wanted": false }
       ]
   },
   "Vivid E95": {
     "hardware": [
-      { "id": 1, "name": "UPS", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 2, "name": "E-Series UPS Support Kit", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 3, "name": "Tripedal footswitch", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 4, "name": "Vivid Exx DVD Option ComExpress", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 5, "name": "Adapter for Pressure Xducer", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 6, "name": "Adapter for MA-300 Heart Sound microphone", "presented": false, "appreciated": false, "wanted": false }
+      { "id": "1", "name": "UPS", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "2", "name": "E-Series UPS Support Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "3", "name": "Tripedal footswitch", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "4", "name": "Vivid Exx DVD Option ComExpress", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "5", "name": "Adapter for Pressure Xducer", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "6", "name": "Adapter for MA-300 Heart Sound microphone", "presented": false, "appreciated": false, "wanted": false }
     ]
   },
   "Vivid iq": {
     "hardware": [
-      { "id": 1, "name": "Vivid iq generic cart", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 2, "name": "Vivid iq multi probe port box", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 3, "name": "Charge box w. 3 batteries", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 4, "name": "Vivid Compact Battery", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 5, "name": "P2D holder", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 6, "name": "Vivid iq Adapter", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 7, "name": "Footswitch MKF 2-MED USB GP26", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 8, "name": "Isolated HDMI converter/splitter", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 9, "name": "HDMI to s-video adaptor", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 10, "name": "DVDRW drive", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 11, "name": "EP Lab Accessory Kit for Vivid iq", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 12, "name": "View-X", "presented": false, "appreciated": false, "wanted": false }
+      { "id": "1", "name": "Vivid iq generic cart", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "2", "name": "Vivid iq multi probe port box", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "3", "name": "Charge box w. 3 batteries", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "4", "name": "Vivid Compact Battery", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "5", "name": "P2D holder", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "6", "name": "Vivid iq Adapter", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "7", "name": "Footswitch MKF 2-MED USB GP26", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "8", "name": "Isolated HDMI converter/splitter", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "9", "name": "HDMI to s-video adaptor", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "10", "name": "DVDRW drive", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "11", "name": "EP Lab Accessory Kit for Vivid iq", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "12", "name": "View-X", "presented": false, "appreciated": false, "wanted": false }
     ]
   },
   "Vivid S60N": {
     "hardware": [
-      { "id": 1, "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 2, "name": "UPS 220–240V 50/60Hz", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 3, "name": "Tripedal footswitch", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 4, "name": "1 TB SSD harddrive", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 5, "name": "Isol. HDMI converter/splitter", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 6, "name": "Vivid S60N_70N Vet kit", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 7, "name": "Vet probe caution label", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 8, "name": "UPS Support Kit", "presented": false, "appreciated": false, "wanted": false }
+      { "id": "1", "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "2", "name": "UPS 220–240V 50/60Hz", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "3", "name": "Tripedal footswitch", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "4", "name": "1 TB SSD harddrive", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "5", "name": "Isol. HDMI converter/splitter", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "6", "name": "Vivid S60N_70N Vet kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "7", "name": "Vet probe caution label", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "8", "name": "UPS Support Kit", "presented": false, "appreciated": false, "wanted": false }
     ]
   },
   "Vivid S70N Dimension": {
     "hardware": [
-  { "id": 1, "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 2, "name": "1 TB SSD harddrive", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 3, "name": "DVD RW", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 4, "name": "UPS 220–240V 50/60Hz for Vivid S / Vivid E-series", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 5, "name": "Vivid S series UPS Support Kit", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 6, "name": "Tripedal footswitch", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 7, "name": "Isolated HDMI video converter/splitter", "presented": false, "appreciated": false, "wanted": false }
+  { "id": "1", "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
+  { "id": "2", "name": "1 TB SSD harddrive", "presented": false, "appreciated": false, "wanted": false },
+  { "id": "3", "name": "DVD RW", "presented": false, "appreciated": false, "wanted": false },
+  { "id": "4", "name": "UPS 220–240V 50/60Hz for Vivid S / Vivid E-series", "presented": false, "appreciated": false, "wanted": false },
+  { "id": "5", "name": "Vivid S series UPS Support Kit", "presented": false, "appreciated": false, "wanted": false },
+  { "id": "6", "name": "Tripedal footswitch", "presented": false, "appreciated": false, "wanted": false },
+  { "id": "7", "name": "Isolated HDMI video converter/splitter", "presented": false, "appreciated": false, "wanted": false }
 ]
 
   },
   "Vivid S70N": {
     "hardware": [
-  { "id": 1, "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 2, "name": "1 TB SSD harddrive", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 3, "name": "DVD RW", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 4, "name": "UPS 220–240V 50/60Hz for Vivid S / Vivid E-series", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 5, "name": "Vivid S series UPS Support Kit", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 6, "name": "Tripedal footswitch", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 7, "name": "Isolated HDMI video converter/splitter", "presented": false, "appreciated": false, "wanted": false }
+  { "id": "1", "name": "Smart Standby – Battery", "presented": false, "appreciated": false, "wanted": false },
+  { "id": "2", "name": "1 TB SSD harddrive", "presented": false, "appreciated": false, "wanted": false },
+  { "id": "3", "name": "DVD RW", "presented": false, "appreciated": false, "wanted": false },
+  { "id": "4", "name": "UPS 220–240V 50/60Hz for Vivid S / Vivid E-series", "presented": false, "appreciated": false, "wanted": false },
+  { "id": "5", "name": "Vivid S series UPS Support Kit", "presented": false, "appreciated": false, "wanted": false },
+  { "id": "6", "name": "Tripedal footswitch", "presented": false, "appreciated": false, "wanted": false },
+  { "id": "7", "name": "Isolated HDMI video converter/splitter", "presented": false, "appreciated": false, "wanted": false }
 ]
 
   },
   "Vivid T8": {
     "hardware": [
-      { "id": 1, "name": "UPS 220V-240V", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 2, "name": "Vivid T-series UPS support kit", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 3, "name": "Suns USB foot switch", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 4, "name": "Integrated SSD HW Option", "presented": false, "appreciated": false, "wanted": false }
+      { "id": "1", "name": "UPS 220V-240V", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "2", "name": "Vivid T-series UPS support kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "3", "name": "Suns USB foot switch", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "4", "name": "Integrated SSD HW Option", "presented": false, "appreciated": false, "wanted": false }
     ]
   },
   "Vivid T9": {
     "hardware": [
-      { "id": 1, "name": "UPS 220V-240V", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 2, "name": "Vivid T-series UPS support kit", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 3, "name": "Suns USB foot switch", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 4, "name": "Integrated SSD HW Option", "presented": false, "appreciated": false, "wanted": false }
+      { "id": "1", "name": "UPS 220V-240V", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "2", "name": "Vivid T-series UPS support kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "3", "name": "Suns USB foot switch", "presented": false, "appreciated": false, "wanted": false },
+      { "id": "4", "name": "Integrated SSD HW Option", "presented": false, "appreciated": false, "wanted": false }
     ]
   }
 }

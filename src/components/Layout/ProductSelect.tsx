@@ -5,7 +5,7 @@ import hardwareDatas from '../data/hardware.json';
 import softwareDatas from '../data/connex.json';
 
 interface HardwareData {
-  id: number;
+  id: string;
   name: string;
   presented: boolean;
   appreciated: boolean;
@@ -23,7 +23,7 @@ type Hardware = {
 const hardwareData= hardwareDatas as Hardware;
 
 interface SoftwareData {
-  id: number;
+  id: string;
   name: string;
   presented: boolean;
   appreciated: boolean;
@@ -43,7 +43,7 @@ const softwareData =  softwareDatas as Software;
 
 
 interface FeaturesData {
-  id: number;
+  id: string;
   name: string;
   presented: boolean;
   appreciated: boolean;
@@ -62,7 +62,7 @@ type Features = {
 const featuresData = featuresDatas as Features;
 
 interface Sonde {
-  id: number;
+  id: string;
   name: string;
   presented: boolean;
   appreciated: boolean;
@@ -103,10 +103,10 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
 
     // Récupérer les données des fichiers JSON en fonction du dispositif
     const deviceData: DeviceData = {
-      sondes: sondesData[device],
-      features: featuresData[device],
-      hardware: hardwareData[device],
-      connex: softwareData[device]
+      sondes: sondesData[device]?.sondes,
+      features: featuresData[device]?.features,
+      hardware: hardwareData[device]?.hardware,
+      connex: softwareData[device]?.accessories
     };
 
     updateDataStates(deviceData);
