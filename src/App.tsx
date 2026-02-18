@@ -1,7 +1,6 @@
 // Modification du composant Product pour intégrer le EmailBodyEditor
 import { ChangeEvent, JSX, useEffect, useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import TestPage from './components/TestPage';
 import ActionButtons from './components/Actions/ActionButtons';
 import Login from './components/Auth/Login';
 import ClientInfo from './components/Client/ClientInfo';
