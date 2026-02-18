@@ -489,4 +489,4 @@ export default function App(): JSX.Element {
       </Router>
     </AuthProvider>
   );
-}
+};
