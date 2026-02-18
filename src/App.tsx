@@ -1,6 +1,6 @@
 // Modification du composant Product pour intégrer le EmailBodyEditor
 import { ChangeEvent, JSX, useEffect, useRef, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ActionButtons from './components/Actions/ActionButtons';
 import Login from './components/Auth/Login';
 import ClientInfo from './components/Client/ClientInfo';
@@ -478,25 +478,10 @@ export default function App(): JSX.Element {
   return (
     <AuthProvider>
       <Router>
-        <nav className="p-4 bg-gray-200 flex gap-4">
-          <Link to="/">Accueil</Link>
-          <Link to="/test">Page de test</Link>
-        </nav>
         <Routes>
           <Route path="/" element={<ProductWithAuth />} />
-          <Route path="/test" element={<TestPage />} />
         </Routes>
       </Router>
     </AuthProvider>
   );
 };
-
-// petit composant de demonstration utilisé dans la route /test.  on n'avait jamais
-// défini `TestPage` ce qui provoquait un crash dans la console lorsque la route
-// était prise.
-const TestPage: React.FC = () => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold">Page de test</h1>
-    <p>Ceci est une page factice utilisée pour vérifier la navigation.</p>
-  </div>
-);
