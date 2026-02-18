@@ -260,6 +260,36 @@ src/
 
 ## Déploiement
 
+### Déploiement sur Vercel (Recommandé)
+
+Le projet est configuré pour un déploiement simple sur Vercel :
+
+#### Méthode 1 : Via l'interface Vercel (le plus simple)
+
+1. Créer un compte sur [vercel.com](https://vercel.com)
+2. Cliquer sur "Add New Project"
+3. Importer le repository GitHub
+4. Vercel détectera automatiquement la configuration Vite
+5. Cliquer sur "Deploy"
+
+#### Méthode 2 : Via CLI Vercel
+
+```bash
+# Installer Vercel CLI
+npm install -g vercel
+
+# Se connecter à Vercel
+vercel login
+
+# Déployer le projet
+vercel
+
+# Pour le déploiement en production
+vercel --prod
+```
+
+Le fichier `vercel.json` est déjà configuré pour gérer correctement le routing SPA.
+
 ### Déploiement automatique sur GitHub Pages
 
 ```bash
