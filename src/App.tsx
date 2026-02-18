@@ -177,7 +177,7 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
       selectedDevice,
       sondes: selectedSondes.map(sonde => ({
         ...sonde,
-        value: sonde.value || '',
+        value: Boolean(sonde.value),
         presented: sonde.presented || false,
         appreciated: sonde.appreciated || false,
         wanted: sonde.wanted || false,
@@ -185,7 +185,7 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
       sondesComments,
       features: softwareFeatures.map(feature => ({
         ...feature,
-        value: feature.value || '',
+        value: Boolean(feature.value),
         presented: feature.presented || false,
         appreciated: feature.appreciated || false,
         wanted: feature.wanted || false,
@@ -193,7 +193,7 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
       featuresComments,
       hardware: hardwareOptions.map(hardware => ({
         ...hardware,
-        value: hardware.value || '',
+        value: Boolean(hardware.value),
         presented: hardware.presented || false,
         appreciated: hardware.appreciated || false,
         wanted: hardware.wanted || false,
@@ -201,7 +201,7 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
       hardwareComments,
       connex: connexOptions.map(connex => ({
         ...connex,
-        value: connex.value || '',
+        value: Boolean(connex.value),
         presented: connex.presented || false,
         appreciated: connex.appreciated || false,
         wanted: connex.wanted || false,
@@ -236,7 +236,7 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
       selectedDevice,
       sondes: selectedSondes.map(sonde => ({
         ...sonde,
-        value: sonde.value || '',
+        value: Boolean(sonde.value),
         presented: sonde.presented || false,
         appreciated: sonde.appreciated || false,
         wanted: sonde.wanted || false,
@@ -244,7 +244,7 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
       sondesComments,
       features: softwareFeatures.map(feature => ({
         ...feature,
-        value: feature.value || '',
+        value: Boolean(feature.value),
         presented: feature.presented || false,
         appreciated: feature.appreciated || false,
         wanted: feature.wanted || false,
@@ -252,7 +252,7 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
       featuresComments,
       hardware: hardwareOptions.map(hardware => ({
         ...hardware,
-        value: hardware.value || '',
+        value: Boolean(hardware.value),
         presented: hardware.presented || false,
         appreciated: hardware.appreciated || false,
         wanted: hardware.wanted || false,
@@ -260,7 +260,7 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
       hardwareComments,
       connex: connexOptions.map(connex => ({
         ...connex,
-        value: connex.value || '',
+        value: Boolean(connex.value),
         presented: connex.presented || false,
         appreciated: connex.appreciated || false,
         wanted: connex.wanted || false,

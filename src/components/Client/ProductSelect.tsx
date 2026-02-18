@@ -5,6 +5,15 @@ import hardwareDataRaw from '../data/hardware.json';
 import softwareDataRaw from '../data/connex.json';
 import { DeviceData } from '../type/types';
 
+// Raw data types from JSON (with number IDs)
+interface RawDataItem {
+  id: number;
+  name: string;
+  description?: string;
+  presented?: boolean;
+  appreciated?: boolean;
+  wanted?: boolean;
+}
 
 interface Sonde {
   id: string;
@@ -64,28 +73,44 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
       const device = e.target.value;
       setSelectedDevice(device);
 
-      const sondesRaw = (sondesDataRaw as Record<string, { sondes: Partial<Sonde>[] }>)[device]?.sondes || [];
-      const deviceSondes: Sonde[] = sondesRaw.map((s) => ({
-        ...s,
+      const sondesRaw = (sondesDataRaw as Record<string, { sondes: RawDataItem[] }>)[device]?.sondes || [];
+      const deviceSondes: Sonde[] = sondesRaw.map((s: RawDataItem) => ({
         id: String(s.id),
+        name: s.name || '',
+        description: s.description,
+        presented: s.presented,
+        appreciated: s.appreciated,
+        wanted: s.wanted,
       }));
 
-      const deviceFeatures = (featuresDataRaw as Record<string, { features : Partial<Feature>[] }>)[device]?.features || [];
-      const deviceFeature : Feature [] = deviceFeatures.map((s) => ({
-        ...s,
+      const deviceFeatures = (featuresDataRaw as Record<string, { features: RawDataItem[] }>)[device]?.features || [];
+      const deviceFeature : Feature [] = deviceFeatures.map((s: RawDataItem) => ({
         id: String(s.id),
+        name: s.name || '',
+        description: s.description,
+        presented: s.presented,
+        appreciated: s.appreciated,
+        wanted: s.wanted,
       }));
 
-      const deviceHardwares = (hardwareDataRaw as Record<string, { hardware : Partial<Hardware>[] }>)[device]?.hardware || [];
-      const deviceHardware : Hardware [] = deviceHardwares.map((s) => ({
-        ...s,
+      const deviceHardwares = (hardwareDataRaw as Record<string, { hardware: RawDataItem[] }>)[device]?.hardware || [];
+      const deviceHardware : Hardware [] = deviceHardwares.map((s: RawDataItem) => ({
         id: String(s.id),
+        name: s.name || '',
+        description: s.description,
+        presented: s.presented,
+        appreciated: s.appreciated,
+        wanted: s.wanted,
       }));
 
-      const deviceConnexs = (softwareDataRaw as Record<string, { accessories : Partial<Connex>[] }>)[device]?.accessories || [];
-      const deviceConnex : Connex [] = deviceConnexs.map((s) => ({
-        ...s,
+      const deviceConnexs = (softwareDataRaw as Record<string, { accessories: RawDataItem[] }>)[device]?.accessories || [];
+      const deviceConnex : Connex [] = deviceConnexs.map((s: RawDataItem) => ({
         id: String(s.id),
+        name: s.name || '',
+        description: s.description,
+        presented: s.presented,
+        appreciated: s.appreciated,
+        wanted: s.wanted,
       }));
 
       const deviceData: DeviceData = {

@@ -1,4 +1,4 @@
-import { jsPDF } from 'jspdf';
+import { jsPDF, type PubSub } from 'jspdf';
 import logoPng from '../assets/GE_HealthCare_logo_2023.png'
 // import autoTable from 'jspdf-autotable';
 // import emailjs from 'emailjs-com';
@@ -62,7 +62,7 @@ type PreparedData = {
 // Define jsPDF internal type extension
 interface PDFInternal {
   getNumberOfPages: () => number;
-  events: Record<string, unknown>;
+  events: PubSub;
   scaleFactor: number;
   pageSize: {
     width: number;
@@ -302,7 +302,7 @@ export const exportToExcel = (data: PreparedData) => {
       pdf.setTextColor(50, 50, 50);
       let xPos = 15;
       rows[i].forEach((cell: string | number | boolean | undefined, idx: number) => {
-        pdf.text(cell.toString(), xPos + cellPadding, y + 5);
+        pdf.text((cell ?? '').toString(), xPos + cellPadding, y + 5);
         xPos += colWidths[idx];
       });
 
@@ -715,7 +715,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
         pdf.setTextColor(50, 50, 50);
         let xPos = 15;
         rows[i].forEach((cell: string | number | boolean | undefined, idx: number) => {
-          pdf.text(cell.toString(), xPos + cellPadding, y + 5);
+          pdf.text((cell ?? '').toString(), xPos + cellPadding, y + 5);
           xPos += colWidths[idx];
         });
 
