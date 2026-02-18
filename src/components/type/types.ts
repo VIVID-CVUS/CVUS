@@ -5,7 +5,7 @@ export interface DataItem {
     presented?: boolean;
     appreciated?: boolean;
     wanted?: boolean;
-    [key: string]: any;
+    [key: string]: string | boolean | undefined;
   }
   
   export interface DeviceData {

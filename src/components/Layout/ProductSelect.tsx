@@ -80,10 +80,10 @@ type SondesData = {
 const sondesData = rawSondesData as SondesData;
 
 interface DeviceData {
-  sondes: any;
-  features: any;
-  hardware: any;
-  connex: any;
+  sondes: Sonde[] | undefined;
+  features: FeaturesData[] | undefined;
+  hardware: HardwareData[] | undefined;
+  connex: SoftwareData[] | undefined;
 }
 
 interface ProductSelectProps {

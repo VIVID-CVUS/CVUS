@@ -13,7 +13,8 @@ interface Sonde {
   presented?: boolean;
   appreciated?: boolean;
   wanted?: boolean;
-  [key: string]: any;
+  // Ajout d'index signature plus stricte
+  [key: string]: string | boolean | undefined;
 }
 
 interface Feature {
@@ -23,7 +24,7 @@ interface Feature {
   presented?: boolean;
   appreciated?: boolean;
   wanted?: boolean;
-  [key: string]: any;
+  [key: string]: string | boolean | undefined;
 }
 
 interface Hardware {
@@ -33,7 +34,7 @@ interface Hardware {
   presented?: boolean;
   appreciated?: boolean;
   wanted?: boolean;
-  [key: string]: any;
+  [key: string]: string | boolean | undefined;
 }
 
 interface Connex {
@@ -43,7 +44,7 @@ interface Connex {
   presented?: boolean;
   appreciated?: boolean;
   wanted?: boolean;
-  [key: string]: any;
+  [key: string]: string | boolean | undefined;
 }
 
 
@@ -63,31 +64,28 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
       const device = e.target.value;
       setSelectedDevice(device);
 
-      const sondesRaw = (sondesDataRaw as Record<string, { sondes: any[] }>)[device]?.sondes || [];
+      const sondesRaw = (sondesDataRaw as Record<string, { sondes: Partial<Sonde>[] }>)[device]?.sondes || [];
       const deviceSondes: Sonde[] = sondesRaw.map((s) => ({
         ...s,
-        id: String(s.id), // 🔁 on force l'ID en string ici pour respecter l'interface
+        id: String(s.id),
       }));
 
-      const deviceFeatures = (featuresDataRaw as Record<string, { features : any[] }>)[device]?.features || [];
+      const deviceFeatures = (featuresDataRaw as Record<string, { features : Partial<Feature>[] }>)[device]?.features || [];
       const deviceFeature : Feature [] = deviceFeatures.map((s) => ({
         ...s,
-        id: String(s.id), // 🔁 on force l'ID en string ici pour respecter l'interface
-
+        id: String(s.id),
       }));
 
-      const deviceHardwares = (hardwareDataRaw as Record<string, { hardware : any[] }>)[device]?.hardware || [];
+      const deviceHardwares = (hardwareDataRaw as Record<string, { hardware : Partial<Hardware>[] }>)[device]?.hardware || [];
       const deviceHardware : Hardware [] = deviceHardwares.map((s) => ({
         ...s,
-        id: String(s.id), // 🔁 on force l'ID en string ici pour respecter l'interface
-
+        id: String(s.id),
       }));
 
-      const deviceConnexs = (softwareDataRaw as Record<string, { accessories : any[] }>)[device]?.accessories || [];
+      const deviceConnexs = (softwareDataRaw as Record<string, { accessories : Partial<Connex>[] }>)[device]?.accessories || [];
       const deviceConnex : Connex [] = deviceConnexs.map((s) => ({
         ...s,
-        id: String(s.id), // 🔁 on force l'ID en string ici pour respecter l'interface
-
+        id: String(s.id),
       }));
 
       const deviceData: DeviceData = {

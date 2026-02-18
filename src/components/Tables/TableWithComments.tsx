@@ -7,7 +7,7 @@ type Item = {
   presented?: boolean; // optional
   appreciated?: boolean; // optional
   wanted?: boolean; // optional
-  value?: any;
+  value?: string | number | boolean | undefined;
 };
 
 type Props = {

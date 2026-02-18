@@ -62,7 +62,7 @@ type PreparedData = {
 // Define jsPDF internal type extension
 interface PDFInternal {
   getNumberOfPages: () => number;
-  events: any;
+  events: Record<string, unknown>;
   scaleFactor: number;
   pageSize: {
     width: number;
@@ -235,7 +235,7 @@ export const exportToExcel = (data: PreparedData) => {
     return yPos + 10;
   };
 
-  const drawTable = (headers: string[], rows: any[][], startY: number, maxY: number = 270) => {
+  const drawTable = (headers: string[], rows: (string | number | boolean | undefined)[][], startY: number, maxY: number = 270) => {
     const cellPadding = 3;
     const fontSize = 9;
     // Largeur totale 180mm, aligné à 15mm
@@ -301,7 +301,7 @@ export const exportToExcel = (data: PreparedData) => {
       // Texte des cellules
       pdf.setTextColor(50, 50, 50);
       let xPos = 15;
-      rows[i].forEach((cell: any, idx: number) => {
+      rows[i].forEach((cell: string | number | boolean | undefined, idx: number) => {
         pdf.text(cell.toString(), xPos + cellPadding, y + 5);
         xPos += colWidths[idx];
       });
@@ -649,7 +649,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
       return yPos + 10;
     };
 
-    const drawTable = (headers: string[], rows: any[][], startY: number, maxY: number = 270) => {
+    const drawTable = (headers: string[], rows: (string | number | boolean | undefined)[][], startY: number, maxY: number = 270) => {
       const cellPadding = 3;
       const fontSize = 9;
       // const lineHeight = fontSize * 0.5;
@@ -714,7 +714,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
         // Texte des cellules
         pdf.setTextColor(50, 50, 50);
         let xPos = 15;
-        rows[i].forEach((cell: any, idx: number) => {
+        rows[i].forEach((cell: string | number | boolean | undefined, idx: number) => {
           pdf.text(cell.toString(), xPos + cellPadding, y + 5);
           xPos += colWidths[idx];
         });

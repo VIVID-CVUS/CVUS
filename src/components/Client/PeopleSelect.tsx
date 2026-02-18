@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 interface Person {
   name: string;
   email: string;
-  [key: string]: any;
+  [key: string]: string | undefined;
 }
 
 interface PeopleSelectProps {
