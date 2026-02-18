@@ -59,26 +59,6 @@ type PreparedData = {
   };
 };
 
-// Define jsPDF internal type extension
-interface PDFInternal {
-  getNumberOfPages: () => number;
-  scaleFactor: number;
-  pageSize: {
-    width: number;
-    getWidth: () => number;
-    height: number;
-    getHeight: () => number;
-  };
-  pages: number[];
-  getEncryptor: (objectId: number) => (data: string) => string;
-  events: any;  // Using any to avoid type conflicts with jsPDF
-}
-
-// Fixed ExtendedJsPDF interface
-interface ExtendedJsPDF extends jsPDF {
-  internal: PDFInternal;
-}
-
 // Fonction de traitement des données des sections (sondes, features, etc.)
 export const processSectionData = (
   data: Record<string, boolean | null>
@@ -183,8 +163,11 @@ export const exportToExcel = (data: PreparedData) => {
 
   //const commercial = data.commercial;
   
-  // Use type assertion to handle the incompatible types
-  const pdf = new jsPDF('p', 'mm', 'a4') as unknown as ExtendedJsPDF;
+  // Create PDF instance
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  
+  // Helper to access internal properties with type assertion
+  const getPageCount = () => (pdf.internal as unknown as { getNumberOfPages: () => number }).getNumberOfPages();
 
   // Fonctionnalités pour créer un PDF
   const drawHeader = () => {
@@ -217,7 +200,7 @@ export const exportToExcel = (data: PreparedData) => {
 
 
   const drawFooter = (pageNumber: number) => {
-    const totalPages = pdf.internal.getNumberOfPages();
+    const totalPages = getPageCount();
     pdf.setFillColor(240, 240, 240);
     pdf.rect(0, 287, 210, 10, 'F');
     pdf.setTextColor(100, 100, 100);
@@ -265,7 +248,7 @@ export const exportToExcel = (data: PreparedData) => {
       // Vérifier si on a besoin d'une nouvelle page
       if (y + 7 > maxY) {
         // Ajouter les footers à la page actuelle
-        drawFooter(pdf.internal.getNumberOfPages());
+        drawFooter(getPageCount());
         // Ajouter une nouvelle page
         pdf.addPage();
         // Dessiner le header de la nouvelle page
@@ -568,7 +551,7 @@ export const exportToExcel = (data: PreparedData) => {
   // pdf.text(`Email: ${commercial ? commercial.email : 'Non spécifié'}`, 25, yPosition + 19);
 
   // Ajouter le footer à la dernière page
-  drawFooter(pdf.internal.getNumberOfPages());
+  drawFooter(getPageCount());
 
   // Générer le fichier PDF
   const fileName = `Démo_${data.selectedDevice}_${data.clientInfo.name}_${new Date().toISOString().split('T')[0]}.pdf`;
@@ -595,8 +578,11 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
     loadingDiv.innerHTML = '<div style="background: white; padding: 20px; border-radius: 5px;">Génération du PDF en cours...</div>';
     document.body.appendChild(loadingDiv);
 
-    // Use type assertion to handle the incompatible types
-    const pdf = new jsPDF('p', 'mm', 'a4') as unknown as ExtendedJsPDF;
+    // Create PDF instance
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    
+    // Helper to access internal properties with type assertion
+    const getPageCount = () => (pdf.internal as unknown as { getNumberOfPages: () => number }).getNumberOfPages();
 
     // Fonctionnalités pour créer un PDF
     const drawHeader = () => {
@@ -631,7 +617,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
 
 
     const drawFooter = (pageNumber: number) => {
-      const totalPages = pdf.internal.getNumberOfPages();
+      const totalPages = getPageCount();
       pdf.setFillColor(240, 240, 240);
       pdf.rect(0, 287, 210, 10, 'F');
       pdf.setTextColor(100, 100, 100);
@@ -678,7 +664,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
         // Vérifier si on a besoin d'une nouvelle page
         if (y + 7 > maxY) {
           // Ajouter les footers à la page actuelle
-          drawFooter(pdf.internal.getNumberOfPages());
+          drawFooter(getPageCount());
           // Ajouter une nouvelle page
           pdf.addPage();
           // Dessiner le header de la nouvelle page
@@ -888,7 +874,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
 
     // Vérifier si on a besoin d'une nouvelle page pour les médecins
     if (yPosition > 200) {
-      drawFooter(pdf.internal.getNumberOfPages());
+      drawFooter(getPageCount());
       pdf.addPage();
       drawHeader();
       yPosition = 45;
@@ -996,7 +982,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
     yPosition += indecisHeight + 15;
 
     // Ajouter le footer à la dernière page
-    drawFooter(pdf.internal.getNumberOfPages());
+    drawFooter(getPageCount());
 
     // Générer le fichier PDF
     const fileName = `Démo_${data.selectedDevice}_${data.clientInfo.name}_${new Date().toISOString().split('T')[0]}.pdf`;
