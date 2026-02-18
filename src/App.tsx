@@ -473,19 +473,3 @@ function ProductWithAuth(): JSX.Element {
   return <Product />;
 }
 
-export default function App(): JSX.Element {
-  return (
-    <AuthProvider>
-      <Router>
-        <nav className="p-4 bg-gray-200 flex gap-4">
-          <Link to="/">Accueil</Link>
-          <Link to="/test">Page de test</Link>
-        </nav>
-        <Routes>
-          <Route path="/" element={<ProductWithAuth />} />
-          <Route path="/test" element={<TestPage />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
-  );
-}
