@@ -76,7 +76,7 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
       const sondesRaw = (sondesDataRaw as Record<string, { sondes: RawDataItem[] }>)[device]?.sondes || [];
       const deviceSondes: Sonde[] = sondesRaw.map((s: RawDataItem) => ({
         id: String(s.id),
-        name: s.name || '',
+        name: s.name,
         description: s.description,
         presented: s.presented,
         appreciated: s.appreciated,
@@ -86,7 +86,7 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
       const deviceFeatures = (featuresDataRaw as Record<string, { features: RawDataItem[] }>)[device]?.features || [];
       const deviceFeature : Feature [] = deviceFeatures.map((s: RawDataItem) => ({
         id: String(s.id),
-        name: s.name || '',
+        name: s.name,
         description: s.description,
         presented: s.presented,
         appreciated: s.appreciated,
@@ -96,7 +96,7 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
       const deviceHardwares = (hardwareDataRaw as Record<string, { hardware: RawDataItem[] }>)[device]?.hardware || [];
       const deviceHardware : Hardware [] = deviceHardwares.map((s: RawDataItem) => ({
         id: String(s.id),
-        name: s.name || '',
+        name: s.name,
         description: s.description,
         presented: s.presented,
         appreciated: s.appreciated,
@@ -106,7 +106,7 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
       const deviceConnexs = (softwareDataRaw as Record<string, { accessories: RawDataItem[] }>)[device]?.accessories || [];
       const deviceConnex : Connex [] = deviceConnexs.map((s: RawDataItem) => ({
         id: String(s.id),
-        name: s.name || '',
+        name: s.name,
         description: s.description,
         presented: s.presented,
         appreciated: s.appreciated,
