@@ -5,10 +5,12 @@ type Props = {
   clientName: string;
   clientEmail: string;
   demoDate: string;
+  lieuService: string;
   generalRemarks: string;
   setClientName: (value: string) => void;
   setClientEmail: (value: string) => void;
   setDemoDate: (value: string) => void;
+  setLieuService: (value: string) => void;
   setGeneralRemarks: (value: string) => void;
 };
 
@@ -16,10 +18,12 @@ const ClientInfo: React.FC<Props> = ({
   clientName,
   clientEmail,
   demoDate,
+  lieuService,
   generalRemarks,
   setClientName,
   setClientEmail,
   setDemoDate,
+  setLieuService,
   setGeneralRemarks
 }) => {
   return (
@@ -63,8 +67,20 @@ const ClientInfo: React.FC<Props> = ({
           />
         </div>
         <div>
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="lieuService">
+            Lieu/Service
+          </label>
+          <input
+            id="lieuService"
+            type="text"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-600"
+            value={lieuService}
+            onChange={(e) => setLieuService(e.target.value)}
+          />
+        </div>
+        <div className="md:col-span-2">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="generalRemarks">
-            Remarque Générale
+            Remarque générale
           </label>
           <textarea
             id="generalRemarks"

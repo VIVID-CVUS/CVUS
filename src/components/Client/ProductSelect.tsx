@@ -5,6 +5,15 @@ import hardwareDataRaw from '../data/hardware.json';
 import softwareDataRaw from '../data/connex.json';
 import { DeviceData } from '../type/types';
 
+type RawDeviceItem = {
+  id: number;
+  name: string;
+  presented: boolean;
+  appreciated: boolean;
+  wanted: boolean;
+};
+
+type RawByDevice<TSection extends string> = Record<string, Record<TSection, RawDeviceItem[]>>;
 
 interface Sonde {
   id: string;
@@ -64,28 +73,40 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
       const device = e.target.value;
       setSelectedDevice(device);
 
-      const sondesRaw = (sondesDataRaw as Record<string, { sondes: Partial<Sonde>[] }>)[device]?.sondes || [];
+      const sondesRaw = ((sondesDataRaw as unknown) as RawByDevice<'sondes'>)[device]?.sondes || [];
       const deviceSondes: Sonde[] = sondesRaw.map((s) => ({
-        ...s,
         id: String(s.id),
+        name: s.name,
+        presented: s.presented,
+        appreciated: s.appreciated,
+        wanted: s.wanted,
       }));
 
-      const deviceFeatures = (featuresDataRaw as Record<string, { features : Partial<Feature>[] }>)[device]?.features || [];
+      const deviceFeatures = ((featuresDataRaw as unknown) as RawByDevice<'features'>)[device]?.features || [];
       const deviceFeature : Feature [] = deviceFeatures.map((s) => ({
-        ...s,
         id: String(s.id),
+        name: s.name,
+        presented: s.presented,
+        appreciated: s.appreciated,
+        wanted: s.wanted,
       }));
 
-      const deviceHardwares = (hardwareDataRaw as Record<string, { hardware : Partial<Hardware>[] }>)[device]?.hardware || [];
+      const deviceHardwares = ((hardwareDataRaw as unknown) as RawByDevice<'hardware'>)[device]?.hardware || [];
       const deviceHardware : Hardware [] = deviceHardwares.map((s) => ({
-        ...s,
         id: String(s.id),
+        name: s.name,
+        presented: s.presented,
+        appreciated: s.appreciated,
+        wanted: s.wanted,
       }));
 
-      const deviceConnexs = (softwareDataRaw as Record<string, { accessories : Partial<Connex>[] }>)[device]?.accessories || [];
+      const deviceConnexs = ((softwareDataRaw as unknown) as RawByDevice<'accessories'>)[device]?.accessories || [];
       const deviceConnex : Connex [] = deviceConnexs.map((s) => ({
-        ...s,
         id: String(s.id),
+        name: s.name,
+        presented: s.presented,
+        appreciated: s.appreciated,
+        wanted: s.wanted,
       }));
 
       const deviceData: DeviceData = {
@@ -100,11 +121,11 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
 
   return (
     <div className="mb-6 bg-white rounded-lg shadow p-4">
-      <div className="flex items-center">
-        <div className="w-1/2 bg-purple-800 text-white font-bold p-3 rounded-l-lg text-center">
+      <div className="w-full flex flex-col md:flex-row items-stretch rounded-lg overflow-hidden border border-gray-200">
+        <div className="w-full md:w-1/2 bg-purple-800 text-white font-bold p-3 text-center flex items-center justify-center">
           Choix du produit :
         </div>
-        <div className="w-1/2 bg-gray-100 p-3 rounded-r-lg flex items-center">
+        <div className="w-full md:w-1/2 bg-gray-100 p-3 flex items-center">
           <select
             value={selectedDevice}
             onChange={handleDeviceChange}

@@ -12,7 +12,6 @@ import ia from './components/data/ia.json';
 import FormContainer from './components/Layout/FormContainer';
 import TableWithComments from './components/Tables/TableWithComments';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { exportToExcel, exportToPDF, prepareData } from './services/dataService';
 import MedecinsTable from './components/Client/MedecinsTable';
 
 // Types définitions inchangées...
@@ -63,6 +62,36 @@ interface DeviceData {
   connex: Connex[];
 }
 
+type EchoPage = {
+  selectedDevice: string;
+  selectedSondes: Sonde[];
+  selectedFeatures: Feature[];
+  selectedHardware: Hardware[];
+  selectedConnex: Connex[];
+  sondesComments: string;
+  featuresComments: string;
+  hardwareComments: string;
+  connexComments: string;
+  promoteurNotes: string;
+  detracteurNotes: string;
+  indecisNotes: string;
+};
+
+const createEmptyEchoPage = (): EchoPage => ({
+  selectedDevice: '',
+  selectedSondes: [],
+  selectedFeatures: [],
+  selectedHardware: [],
+  selectedConnex: [],
+  sondesComments: '',
+  featuresComments: '',
+  hardwareComments: '',
+  connexComments: '',
+  promoteurNotes: '',
+  detracteurNotes: '',
+  indecisNotes: '',
+});
+
 function Product(): JSX.Element {
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -70,30 +99,11 @@ function Product(): JSX.Element {
   const [clientName, setClientName] = useState<string>('');
   const [clientEmail, setClientEmail] = useState<string>('');
   const [demoDate, setDemoDate] = useState<string>('');
+  const [lieuService, setLieuService] = useState<string>('');
   const [generalRemarks, setGeneralRemarks] = useState<string>('');
 
-  // Avis client 
-  const [promoteurNotes, setPromoteurNotes] = useState<string>("");
-const [detracteurNotes, setDetracteurNotes] = useState<string>("");
-const [indecisNotes, setIndecisNotes] = useState<string>("");
-  // États pour les dispositifs
-  const [selectedDevice, setSelectedDevice] = useState<string>('');
-  // on ne garde que le setter pour les sondes, car la valeur n'est jamais utilisée.
-  const setSondes = useState<Sonde[]>([])[1];
-  const [softwareFeatures, setSoftwareFeatures] = useState<Feature[]>([]);
-  const [hardwareOptions, setHardwareOptions] = useState<Hardware[]>([]);
-  const [connexOptions, setConnexOptions] = useState<Connex[]>([]);
-
-  const [selectedSondes, setSelectedSondes] = useState<Sonde[]>([]);
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
-  const [selectedHardware, setSelectedHardware] = useState<Hardware[]>([]);
-  const [selectedConnex, setSelectedConnex] = useState<Connex[]>([]);
-
-  // États pour les commentaires
-  const [sondesComments, setSondesComments] = useState<string>('');
-  const [featuresComments, setFeaturesComments] = useState<string>('');
-  const [hardwareComments, setHardwareComments] = useState<string>('');
-  const [connexComments, setConnexComments] = useState<string>('');
+  const [echoPages, setEchoPages] = useState<EchoPage[]>([createEmptyEchoPage()]);
+  const [activeEchoIndex, setActiveEchoIndex] = useState<number>(0);
 
   // États pour les commerciaux et IAs
   const [selectedCommercialEmails, setSelectedCommercialEmails] = useState<string[]>([]);
@@ -108,224 +118,156 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
     setEmailBody(`Bonjour,\n\nVeuillez trouver ci-joint le rapport de démonstration pour ${clientName}.`);
   }, [clientName]);
 
+  const activeEcho = echoPages[activeEchoIndex] ?? createEmptyEchoPage();
+
+  const updateActiveEcho = (updater: (prev: EchoPage) => EchoPage): void => {
+    setEchoPages((prev) => prev.map((page, idx) => (idx === activeEchoIndex ? updater(page) : page)));
+  };
+
+  const addEchographePage = (): void => {
+    const newIndex = echoPages.length;
+    setEchoPages([...echoPages, createEmptyEchoPage()]);
+    setActiveEchoIndex(newIndex);
+  };
+
   // Gérer le changement de case à cocher (reste inchangé)
   const handleCheckboxChange = (section: string, itemId: string, field: string, value: boolean | string): void => {
-    // Implémentation identique...
-    switch (section) {
-      case 'sondes':
-        setSondes(prevSondes => {
-          const updatedSondes = prevSondes.map(item =>
-            item.id === itemId ? { ...item, [field]: value } : item
-          );
-          setSelectedSondes(updatedSondes);
-          return updatedSondes;
-        });
-        break;
-      case 'features':
-        setSoftwareFeatures(prevFeatures => {
-          const updatedFeatures = prevFeatures.map(item =>
-            item.id === itemId ? { ...item, [field]: value } : item
-          );
-          setSelectedFeatures(updatedFeatures);
-          return updatedFeatures;
-        });
-        break;
-      case 'hardware':
-        setHardwareOptions(prevHardware => {
-          const updatedHardware = prevHardware.map(item =>
-            item.id === itemId ? { ...item, [field]: value } : item
-          );
-          setSelectedHardware(updatedHardware);
-          return updatedHardware;
-        });
-        break;
-      case 'connex':
-        setConnexOptions(prevConnex => {
-          const updatedConnex = prevConnex.map(item =>
-            item.id === itemId ? { ...item, [field]: value } : item
-          );
-          setSelectedConnex(updatedConnex);
-          return updatedConnex;
-        });
-        break;
-      default:
-        break;
-    }
+    const updateList = <T extends { id: string }>(list: T[]): T[] => (
+      list.map((item) => (item.id === itemId ? { ...item, [field]: value } : item))
+    );
+
+    updateActiveEcho((prev) => {
+      switch (section) {
+        case 'sondes':
+          return { ...prev, selectedSondes: updateList(prev.selectedSondes) };
+        case 'features':
+          return { ...prev, selectedFeatures: updateList(prev.selectedFeatures) };
+        case 'hardware':
+          return { ...prev, selectedHardware: updateList(prev.selectedHardware) };
+        case 'connex':
+          return { ...prev, selectedConnex: updateList(prev.selectedConnex) };
+        default:
+          return prev;
+      }
+    });
   };
 
   // Fonctions pour gérer le changement des commentaires
   const handleSondesCommentsChange = (e: ChangeEvent<HTMLTextAreaElement>): void =>
-    setSondesComments(e.target.value);
+    updateActiveEcho((prev) => ({ ...prev, sondesComments: e.target.value }));
 
   const handleFeaturesCommentsChange = (e: ChangeEvent<HTMLTextAreaElement>): void =>
-    setFeaturesComments(e.target.value);
+    updateActiveEcho((prev) => ({ ...prev, featuresComments: e.target.value }));
 
   const handleHardwareCommentsChange = (e: ChangeEvent<HTMLTextAreaElement>): void =>
-    setHardwareComments(e.target.value);
+    updateActiveEcho((prev) => ({ ...prev, hardwareComments: e.target.value }));
 
   const handleConnexCommentsChange = (e: ChangeEvent<HTMLTextAreaElement>): void =>
-    setConnexComments(e.target.value);
+    updateActiveEcho((prev) => ({ ...prev, connexComments: e.target.value }));
 
-  // Fonctions pour les boutons d'action (restent inchangées)
-  const sendExcelToCommercial = (): void => {
+  const buildPreparedDataList = async () => {
+    const { prepareData } = await import('./services/dataService');
 
-    const data = prepareData({
-      clientName,
-      clientEmail,
-      demoDate,
-      generalRemarks,
-      selectedDevice,
-      sondes: selectedSondes.map(sonde => ({
-        ...sonde,
-        value: sonde.value || '',
-        presented: sonde.presented || false,
-        appreciated: sonde.appreciated || false,
-        wanted: sonde.wanted || false,
-      })),
-      sondesComments,
-      features: softwareFeatures.map(feature => ({
-        ...feature,
-        value: feature.value || '',
-        presented: feature.presented || false,
-        appreciated: feature.appreciated || false,
-        wanted: feature.wanted || false,
-      })),
-      featuresComments,
-      hardware: hardwareOptions.map(hardware => ({
-        ...hardware,
-        value: hardware.value || '',
-        presented: hardware.presented || false,
-        appreciated: hardware.appreciated || false,
-        wanted: hardware.wanted || false,
-      })),
-      hardwareComments,
-      connex: connexOptions.map(connex => ({
-        ...connex,
-        value: connex.value || '',
-        presented: connex.presented || false,
-        appreciated: connex.appreciated || false,
-        wanted: connex.wanted || false,
-      })),
-      connexComments,
-      selectedCommercialEmails,
-      commerciaux,
-      selectedIAEmails,
-      emailBody,
-      medecins: {
-  promoteur: promoteurNotes,
-  detracteur: detracteurNotes,
-  indecis: indecisNotes,
-},
-    });
-
-    exportToExcel(data);
+    return echoPages
+      .filter((page) => page.selectedDevice)
+      .map((page) =>
+        prepareData({
+          clientName,
+          clientEmail,
+          demoDate,
+          lieuService,
+          generalRemarks,
+          selectedDevice: page.selectedDevice,
+          sondes: page.selectedSondes.map((sonde) => ({
+            ...sonde,
+            value: Boolean(sonde.value),
+            presented: sonde.presented || false,
+            appreciated: sonde.appreciated || false,
+            wanted: sonde.wanted || false,
+          })),
+          sondesComments: page.sondesComments,
+          features: page.selectedFeatures.map((feature) => ({
+            ...feature,
+            value: Boolean(feature.value),
+            presented: feature.presented || false,
+            appreciated: feature.appreciated || false,
+            wanted: feature.wanted || false,
+          })),
+          featuresComments: page.featuresComments,
+          hardware: page.selectedHardware.map((hardware) => ({
+            ...hardware,
+            value: Boolean(hardware.value),
+            presented: hardware.presented || false,
+            appreciated: hardware.appreciated || false,
+            wanted: hardware.wanted || false,
+          })),
+          hardwareComments: page.hardwareComments,
+          connex: page.selectedConnex.map((connex) => ({
+            ...connex,
+            value: Boolean(connex.value),
+            presented: connex.presented || false,
+            appreciated: connex.appreciated || false,
+            wanted: connex.wanted || false,
+          })),
+          connexComments: page.connexComments,
+          selectedCommercialEmails,
+          commerciaux,
+          selectedIAEmails,
+          emailBody,
+          medecins: {
+            promoteur: page.promoteurNotes,
+            detracteur: page.detracteurNotes,
+            indecis: page.indecisNotes,
+          },
+        })
+      );
   };
 
-  const sendPdfToCommercial = (): void => {
+  // Fonctions pour les boutons d'action (restent inchangées)
+  const sendExcelToCommercial = async (): Promise<void> => {
+    const { exportMultipleToExcel } = await import('./services/dataService');
+    const preparedDataList = await buildPreparedDataList();
+    if (!preparedDataList.length) {
+      alert('Veuillez sélectionner au moins un échographe avant le téléchargement.');
+      return;
+    }
+
+    await exportMultipleToExcel(preparedDataList);
+  };
+
+  const sendPdfToCommercial = async (): Promise<void> => {
+    const { exportMultipleToPDF } = await import('./services/dataService');
+
     // Implementation identique...
     if (!selectedCommercialEmails.length) {
       alert("Veuillez sélectionner un commercial avant d'envoyer le PDF.");
       return;
     }
 
-    const data = prepareData({
-      clientName,
-      clientEmail,
-      demoDate,
-      generalRemarks,
-      selectedDevice,
-      sondes: selectedSondes.map(sonde => ({
-        ...sonde,
-        value: sonde.value || '',
-        presented: sonde.presented || false,
-        appreciated: sonde.appreciated || false,
-        wanted: sonde.wanted || false,
-      })),
-      sondesComments,
-      features: softwareFeatures.map(feature => ({
-        ...feature,
-        value: feature.value || '',
-        presented: feature.presented || false,
-        appreciated: feature.appreciated || false,
-        wanted: feature.wanted || false,
-      })),
-      featuresComments,
-      hardware: hardwareOptions.map(hardware => ({
-        ...hardware,
-        value: hardware.value || '',
-        presented: hardware.presented || false,
-        appreciated: hardware.appreciated || false,
-        wanted: hardware.wanted || false,
-      })),
-      hardwareComments,
-      connex: connexOptions.map(connex => ({
-        ...connex,
-        value: connex.value || '',
-        presented: connex.presented || false,
-        appreciated: connex.appreciated || false,
-        wanted: connex.wanted || false,
-      })),
-      connexComments,
-      selectedCommercialEmails,
-      commerciaux,
-      selectedIAEmails,
-      emailBody,
-      medecins: {
-    promoteur: promoteurNotes,
-    detracteur: detracteurNotes,
-    indecis: indecisNotes,
-  }
-    });
+    const preparedDataList = await buildPreparedDataList();
+    if (!preparedDataList.length) {
+      alert('Veuillez sélectionner au moins un échographe avant l\'envoi.');
+      return;
+    }
 
-      if (formRef.current) {
-        exportToPDF(data, formRef as React.RefObject<HTMLFormElement>);
-      }
+    if (formRef.current) {
+      await exportMultipleToPDF(preparedDataList, formRef as React.RefObject<HTMLFormElement>);
+    }
   };
 
   // Mettre à jour les états des données après la sélection du dispositif
   const updateDataStates = (deviceData: DeviceData): void => {
-    // Implementation identique...
-    // Sondes
-    if (deviceData.sondes) {
-      setSondes(deviceData.sondes);
-      setSelectedSondes(deviceData.sondes);
-    } else {
-      setSondes([]);
-      setSelectedSondes([]);
-    }
-
-    // Features
-    if (deviceData.features) {
-      setSoftwareFeatures(deviceData.features);
-      setSelectedFeatures(deviceData.features);
-    } else {
-      setSoftwareFeatures([]);
-      setSelectedFeatures([]);
-    }
-
-    // Hardware
-    if (deviceData.hardware) {
-      setHardwareOptions(deviceData.hardware);
-      setSelectedHardware(deviceData.hardware);
-    } else {
-      setHardwareOptions([]);
-      setSelectedHardware([]);
-    }
-
-    // Connex
-    if (deviceData.connex) {
-      setConnexOptions(deviceData.connex);
-      setSelectedConnex(deviceData.connex);
-    } else {
-      setConnexOptions([]);
-      setSelectedConnex([]);
-    }
-
-    // Réinitialiser les commentaires
-    setSondesComments('');
-    setFeaturesComments('');
-    setHardwareComments('');
-    setConnexComments('');
+    updateActiveEcho((prev) => ({
+      ...prev,
+      selectedSondes: deviceData.sondes || [],
+      selectedFeatures: deviceData.features || [],
+      selectedHardware: deviceData.hardware || [],
+      selectedConnex: deviceData.connex || [],
+      sondesComments: '',
+      featuresComments: '',
+      hardwareComments: '',
+      connexComments: '',
+    }));
   };
 
   return (
@@ -334,44 +276,65 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
         clientName={clientName}
         clientEmail={clientEmail}
         demoDate={demoDate}
+        lieuService={lieuService}
         generalRemarks={generalRemarks}
         setClientName={setClientName}
         setClientEmail={setClientEmail}
         setDemoDate={setDemoDate}
+        setLieuService={setLieuService}
         setGeneralRemarks={setGeneralRemarks}
       />
+      <div className="mb-4 bg-white rounded-lg shadow p-4">
+        <div className="flex flex-wrap gap-2 items-center">
+          {echoPages.map((_, index) => (
+            <button
+              key={`echo-page-${index}`}
+              type="button"
+              className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                activeEchoIndex === index
+                  ? 'bg-purple-800 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              onClick={() => setActiveEchoIndex(index)}
+            >
+              {`Échographe ${index + 1}`}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <MedecinsTable
-  promoteur={promoteurNotes}
-  setPromoteur={setPromoteurNotes}
-  detracteur={detracteurNotes}
-  setDetracteur={setDetracteurNotes}
-  indecis={indecisNotes}
-  setIndecis={setIndecisNotes}
-/>
+        promoteur={activeEcho.promoteurNotes}
+        setPromoteur={(v) => updateActiveEcho((prev) => ({ ...prev, promoteurNotes: v }))}
+        detracteur={activeEcho.detracteurNotes}
+        setDetracteur={(v) => updateActiveEcho((prev) => ({ ...prev, detracteurNotes: v }))}
+        indecis={activeEcho.indecisNotes}
+        setIndecis={(v) => updateActiveEcho((prev) => ({ ...prev, indecisNotes: v }))}
+      />
       <ProductSelect
-        selectedDevice={selectedDevice}
-        setSelectedDevice={setSelectedDevice}
+        selectedDevice={activeEcho.selectedDevice}
+        setSelectedDevice={(device) => updateActiveEcho((prev) => ({ ...prev, selectedDevice: device }))}
         updateDataStates={updateDataStates}
       />
 
-      {selectedDevice && (
+      {activeEcho.selectedDevice && (
         <div>
           <div className="flex flex-wrap -mx-2">
             {/* Colonne de gauche */}
             <div className="w-full md:w-1/2 px-2">
               <TableWithComments
                 title="Sondes"
-                data={selectedSondes}
+                data={activeEcho.selectedSondes}
                 section="sondes"
-                comments={sondesComments}
+                comments={activeEcho.sondesComments}
                 handleCommentsChange={handleSondesCommentsChange}
                 handleCheckboxChange={handleCheckboxChange}
               />
               <TableWithComments
-                title="Options Sofwares"
-                data={selectedFeatures}
+                title="Option Software"
+                data={activeEcho.selectedFeatures}
                 section="features"
-                comments={featuresComments}
+                comments={activeEcho.featuresComments}
                 handleCommentsChange={handleFeaturesCommentsChange}
                 handleCheckboxChange={handleCheckboxChange}
               />
@@ -380,18 +343,18 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
             {/* Colonne de droite */}
             <div className="w-full md:w-1/2 px-2">
               <TableWithComments
-                title="Options Hardwares"
-                data={selectedHardware}
+                title="Option Hardware"
+                data={activeEcho.selectedHardware}
                 section="hardware"
-                comments={hardwareComments}
+                comments={activeEcho.hardwareComments}
                 handleCommentsChange={handleHardwareCommentsChange}
                 handleCheckboxChange={handleCheckboxChange}
               />
               <TableWithComments
-                title="Connectivités et imprimantes"
-                data={selectedConnex}
+                title="Connectivité et imprimante"
+                data={activeEcho.selectedConnex}
                 section="connex"
-                comments={connexComments}
+                comments={activeEcho.connexComments}
                 handleCommentsChange={handleConnexCommentsChange}
                 handleCheckboxChange={handleCheckboxChange}
               />
@@ -407,7 +370,7 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
                   selectedEmails={selectedCommercialEmails}
                   setSelectedEmails={setSelectedCommercialEmails}
                   commerciaux={commerciaux}
-                  title="Commercial"
+                  title="Destinataire"
                   multiple={true}
                 />
               </div>
@@ -418,7 +381,7 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
                   selectedEmails={selectedIAEmails}
                   setSelectedEmails={setSelectedIAEmails}
                   commerciaux={ia}
-                  title="IAs en copie"
+                  title="Copie"
                   multiple={true}
                 />
               </div>
@@ -436,23 +399,11 @@ const [indecisNotes, setIndecisNotes] = useState<string>("");
             <div className="flex justify-end space-x-4">
               <ActionButtons
                 selectedCommercial={!!selectedCommercialEmails.length}
+                addEchographe={addEchographePage}
                 downloadPdf={sendExcelToCommercial}
                 sendPdfToCommercial={sendPdfToCommercial}
               />
             </div>
-          </div>
-
-          {/* Button pour la soumission du formulaire */}
-          <div className="mt-8 pb-8 flex justify-center">
-            <button
-              className="bg-purple-800 text-white py-3 px-8 rounded-lg hover:bg-purple-700 transition-colors duration-300 shadow-lg flex items-center text-lg"
-              onClick={sendPdfToCommercial}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              Enregistrer
-            </button>
           </div>
         </div>
       )}
