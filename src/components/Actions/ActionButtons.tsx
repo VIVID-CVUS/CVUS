@@ -3,19 +3,39 @@ import React from 'react';
 
 type Props = {
   selectedCommercial: boolean;
+  addEchographe: () => void;
   downloadPdf: () => void;
   sendPdfToCommercial: () => void;
 };
 
 const ActionButtons: React.FC<Props> = ({
   selectedCommercial,
+  addEchographe,
   downloadPdf,
   sendPdfToCommercial,
 }) => {
   return (
-    <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 justify-center mt-4 p-4">
+    <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 justify-center items-center mt-4 p-4">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          addEchographe();
+        }}
+        className="bg-purple-800 text-white py-2 px-6 rounded-lg hover:bg-purple-700 transition-colors duration-300 shadow-md flex items-center justify-center"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg"
+             className="h-5 w-5 mr-2"
+             viewBox="0 0 20 20"
+             fill="currentColor">
+          <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+        </svg>
+        Ajouter échographe
+      </button>
+
       {/* Télécharger le PDF */}
       <button
+        type="button"
         onClick={(e) => {
           e.preventDefault();
           downloadPdf();
@@ -34,6 +54,7 @@ const ActionButtons: React.FC<Props> = ({
 
       {/* Envoyer le PDF */}
       <button
+        type="button"
         onClick={(e) => {
           e.preventDefault();
           sendPdfToCommercial();

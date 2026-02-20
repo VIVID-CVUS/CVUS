@@ -107,5 +107,41 @@
       { "id": 3, "name": "Suns USB foot switch", "presented": false, "appreciated": false, "wanted": false },
       { "id": 4, "name": "Integrated SSD HW Option", "presented": false, "appreciated": false, "wanted": false }
     ]
+  },
+    "Venue": {
+    "hardware": [
+      { "id": 1, "name": "Zebra Barcode Reader Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Lecteur de Badge RFID", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "WiFi adapter Netgear A8000 Venue Fit", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+      "Venue Go": {
+    "hardware": [
+     { "id": 1, "name": "Venue Go Compact Roller Bag", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Housses stériles pour écran", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "Zebra Barcode Reader Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "Transcend DVD/CD", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "Venue Go 512GB SSD", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 6, "name": "Lecteur de Badge RFID", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 7, "name": "WiFi adapter Netgear A8000 Venue Fit", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+      "Venue Fit": {
+    "hardware": [
+      { "id": 1, "name": "Roller Bag", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Housses stériles pour écran", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "Zebra Barcode Reader Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "Transcend DVD/CD", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "Venue Fit 512GB SSD", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 6, "name": "Lecteur de Badge RFID", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 7, "name": "WiFi adapter Netgear A8000 Venue Fit", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+      "Venue Sprint": {
+    "hardware": [
+      { "id": 1, "name": "Zebra Barcode Reader Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Housses stériles pour écran", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "Lecteur de Badge RFID", "presented": false, "appreciated": false, "wanted": false }
+    ]
   }
 }

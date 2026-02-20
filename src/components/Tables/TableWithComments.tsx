@@ -38,7 +38,23 @@ const TableWithComments: React.FC<Props> = ({
         <thead>
           <tr>
             <th className="bg-purple-800 text-white font-bold p-2 text-center border border-gray-300">{title}</th>
-            <th className="bg-purple-800 text-white font-bold p-2 text-center border border-gray-300">Présenté</th>
+            <th className="bg-purple-800 text-white font-bold p-2 text-center border border-gray-300">
+              <div className="flex flex-col items-center gap-1">
+                <span>Présenté</span>
+                <button
+                  type="button"
+                  className="text-xs bg-white text-purple-800 px-2 py-0.5 rounded font-semibold hover:bg-gray-100"
+                  onClick={() => {
+                    const areAllPresented = data.length > 0 && data.every((item) => !!item.presented);
+                    data.forEach((item) => {
+                      handleCheckboxChange(section, item.id, 'presented', !areAllPresented);
+                    });
+                  }}
+                >
+                  Tout
+                </button>
+              </div>
+            </th>
             <th className="bg-purple-800 text-white font-bold p-2 text-center border border-gray-300">Souhaité par le client</th>
             <th className="bg-purple-800 text-white font-bold p-2 text-center border border-gray-300">Non Souhaité par le client</th>
           </tr>
