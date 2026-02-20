@@ -4,8 +4,39 @@ import logoPng from '../assets/GE_HealthCare_logo_2023.png'
 // import emailjs from 'emailjs-com';
 
 // Define your color constants
-const primaryColor = [87, 41, 139]; // GE Healthcare Violet
-const accentColor = [87, 41, 139]; // Or another appropriate color
+const primaryColor = [96, 34, 166]; // #6022A6
+const accentColor = [96, 34, 166];
+
+const formatDateJJMMAAAA = (dateValue?: string): string => {
+  if (!dateValue) {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  const frDatePattern = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+  if (frDatePattern.test(dateValue)) {
+    return dateValue;
+  }
+
+  const isoDateMatch = dateValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoDateMatch) {
+    const [, year, month, day] = isoDateMatch;
+    return `${day}/${month}/${year}`;
+  }
+
+  const parsedDate = new Date(dateValue);
+  if (!Number.isNaN(parsedDate.getTime())) {
+    const day = String(parsedDate.getDate()).padStart(2, '0');
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+    const year = parsedDate.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  return dateValue;
+};
 
 // Type de données pour la présentation des éléments
 export type PresentedItem = {
@@ -189,7 +220,7 @@ export const exportToExcel = (data: PreparedData) => {
   // Fonctionnalités pour créer un PDF
   const drawHeader = () => {
     // 1️⃣ Fond violet
-    pdf.setFillColor(87, 41, 139);
+    pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     pdf.rect(0, 0, 210, 35, 'F');
 
     // 2️⃣ Logo GE Healthcare à gauche
@@ -208,7 +239,7 @@ export const exportToExcel = (data: PreparedData) => {
     pdf.setFont('helvetica', 'normal');
     pdf.text(`Client: ${data.clientInfo.name}`, 105, 24, { align: 'center' });
     pdf.text(
-      `Date: ${data.clientInfo.demoDate || new Date().toLocaleDateString()}`,
+      `Date: ${formatDateJJMMAAAA(data.clientInfo.demoDate)}`,
       105,
       31,
       { align: 'center' }
@@ -216,8 +247,7 @@ export const exportToExcel = (data: PreparedData) => {
   };
 
 
-  const drawFooter = (pageNumber: number) => {
-    const totalPages = pdf.internal.getNumberOfPages();
+  const drawFooter = (pageNumber: number, totalPages: number) => {
     pdf.setFillColor(240, 240, 240);
     pdf.rect(0, 287, 210, 10, 'F');
     pdf.setTextColor(100, 100, 100);
@@ -238,14 +268,16 @@ export const exportToExcel = (data: PreparedData) => {
   const drawTable = (headers: string[], rows: (string | number | boolean | undefined)[][], startY: number, maxY: number = 270) => {
     const cellPadding = 3;
     const fontSize = 9;
+    const lineHeight = 4;
     // Largeur totale 180mm, aligné à 15mm
     const colCount = headers.length;
     const colWidths = Array(colCount).fill(Math.floor(180 / colCount));
+    const tableWidth = colWidths.reduce((sum, width) => sum + width, 0);
     let y = startY;
 
     // En-têtes du tableau
     pdf.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
-    pdf.rect(15, y, 180, 8, 'F');
+    pdf.rect(15, y, tableWidth, 8, 'F');
 
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(fontSize);
@@ -263,9 +295,15 @@ export const exportToExcel = (data: PreparedData) => {
     pdf.setFont('helvetica', 'normal');
     for (let i = 0; i < rows.length; i++) {
       // Vérifier si on a besoin d'une nouvelle page
-      if (y + 7 > maxY) {
-        // Ajouter les footers à la page actuelle
-        drawFooter(pdf.internal.getNumberOfPages());
+      const wrappedRow = rows[i].map((cell: string | number | boolean | undefined, idx: number) => {
+        const text = cell === undefined || cell === null ? '' : String(cell);
+        const usableWidth = Math.max(colWidths[idx] - (cellPadding * 2), 8);
+        return pdf.splitTextToSize(text, usableWidth);
+      });
+      const rowLineCount = Math.max(...wrappedRow.map((lines: string[]) => Math.max(lines.length, 1)));
+      const rowHeight = Math.max((rowLineCount * lineHeight) + 2, 7);
+
+      if (y + rowHeight > maxY) {
         // Ajouter une nouvelle page
         pdf.addPage();
         // Dessiner le header de la nouvelle page
@@ -274,7 +312,7 @@ export const exportToExcel = (data: PreparedData) => {
         y = 40;
         // Redessiner les en-têtes du tableau
         pdf.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
-        pdf.rect(15, y, 180, 8, 'F');
+        pdf.rect(15, y, tableWidth, 8, 'F');
 
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(fontSize);
@@ -296,17 +334,17 @@ export const exportToExcel = (data: PreparedData) => {
       } else {
         pdf.setFillColor(255, 255, 255);
       }
-      pdf.rect(15, y, 180, 7, 'F');
+      pdf.rect(15, y, tableWidth, rowHeight, 'F');
 
       // Texte des cellules
       pdf.setTextColor(50, 50, 50);
       let xPos = 15;
-      rows[i].forEach((cell: string | number | boolean | undefined, idx: number) => {
-        pdf.text(cell.toString(), xPos + cellPadding, y + 5);
+      wrappedRow.forEach((cellLines: string[], idx: number) => {
+        pdf.text(cellLines, xPos + cellPadding, y + 4);
         xPos += colWidths[idx];
       });
 
-      y += 7;
+      y += rowHeight;
     }
 
     return y + 5;
@@ -316,14 +354,21 @@ export const exportToExcel = (data: PreparedData) => {
     if (!comment) return y;
 
     pdf.setFillColor(245, 245, 245);
-    const boxHeight = Math.ceil(comment.length / 75) * 5 + 10; // Estimation de la hauteur nécessaire
+    const commentLines = pdf.splitTextToSize(comment, 170);
+    const boxHeight = Math.max((commentLines.length * 5) + 10, 12);
+
+    if (y + boxHeight > 270) {
+      pdf.addPage();
+      drawHeader();
+      y = 45;
+    }
+
     pdf.rect(15, y, 180, boxHeight, 'F');
 
     pdf.setFont('helvetica', 'italic');
     pdf.setTextColor(80, 80, 80);
     pdf.setFontSize(9);
 
-    const commentLines = pdf.splitTextToSize(comment, 170);
     pdf.text(commentLines, 20, y + 5);
 
     return y + boxHeight + 5;
@@ -343,7 +388,7 @@ export const exportToExcel = (data: PreparedData) => {
   const clientInfoTable = [
     ['Nom du client', data.clientInfo.name || 'Non spécifié'],
     ['Email', data.clientInfo.email || 'Non spécifié'],
-    ['Date de démonstration', data.clientInfo.demoDate || 'Non spécifiée']
+    ['Date de démonstration', data.clientInfo.demoDate ? formatDateJJMMAAAA(data.clientInfo.demoDate) : 'Non spécifiée']
   ];
   // Largeur du tableau informations client = 180mm, aligné à 15mm
   const infoHeaders = ['Information', 'Détail'];
@@ -469,7 +514,6 @@ export const exportToExcel = (data: PreparedData) => {
 
   // Vérifier si on a besoin d'une nouvelle page pour les fonctionnalités
   if (yPosition > 200) {
-    drawFooter(1);
     pdf.addPage();
     drawHeader();
     yPosition = 45;
@@ -498,7 +542,6 @@ export const exportToExcel = (data: PreparedData) => {
   yPosition = addCommentBox(data.features.comments, yPosition);
 
   // Ajouter la deuxième page pour les options matérielles et connexion
-  drawFooter(1);
   pdf.addPage();
   drawHeader();
   yPosition = 45;
@@ -567,8 +610,12 @@ export const exportToExcel = (data: PreparedData) => {
   // pdf.text(`Nom: ${commercial ? commercial.name : 'Non spécifié'}`, 25, yPosition + 13);
   // pdf.text(`Email: ${commercial ? commercial.email : 'Non spécifié'}`, 25, yPosition + 19);
 
-  // Ajouter le footer à la dernière page
-  drawFooter(pdf.internal.getNumberOfPages());
+  // Ajouter les footers à la fin pour garantir une pagination correcte
+  const totalPages = pdf.internal.getNumberOfPages();
+  for (let page = 1; page <= totalPages; page++) {
+    pdf.setPage(page);
+    drawFooter(page, totalPages);
+  }
 
   // Générer le fichier PDF
   const fileName = `Démo_${data.selectedDevice}_${data.clientInfo.name}_${new Date().toISOString().split('T')[0]}.pdf`;
@@ -601,7 +648,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
     // Fonctionnalités pour créer un PDF
     const drawHeader = () => {
       // 1️⃣ Fond violet
-      pdf.setFillColor(87, 41, 139);
+      pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       pdf.rect(0, 0, 210, 35, 'F');
 
       // 2️⃣ Logo GE Healthcare
@@ -622,7 +669,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
       pdf.setFont('helvetica', 'normal');
       pdf.text(`Client: ${data.clientInfo.name}`, 105, 22, { align: 'center' });
       pdf.text(
-        `Date: ${data.clientInfo.demoDate || new Date().toLocaleDateString()}`,
+        `Date: ${formatDateJJMMAAAA(data.clientInfo.demoDate)}`,
         105,
         29,
         { align: 'center' }
@@ -630,8 +677,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
     };
 
 
-    const drawFooter = (pageNumber: number) => {
-      const totalPages = pdf.internal.getNumberOfPages();
+    const drawFooter = (pageNumber: number, totalPages: number) => {
       pdf.setFillColor(240, 240, 240);
       pdf.rect(0, 287, 210, 10, 'F');
       pdf.setTextColor(100, 100, 100);
@@ -652,13 +698,14 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
     const drawTable = (headers: string[], rows: (string | number | boolean | undefined)[][], startY: number, maxY: number = 270) => {
       const cellPadding = 3;
       const fontSize = 9;
-      // const lineHeight = fontSize * 0.5;
+      const lineHeight = 4;
       const colWidths = [80, 30, 30, 30]; // Ajustez selon vos besoins
+      const tableWidth = colWidths.reduce((a, b) => a + b, 0);
       let y = startY;
 
       // En-têtes du tableau
       pdf.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
-      pdf.rect(15, y, colWidths.reduce((a, b) => a + b, 0), 8, 'F');
+      pdf.rect(15, y, tableWidth, 8, 'F');
 
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(fontSize);
@@ -676,9 +723,15 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
       pdf.setFont('helvetica', 'normal');
       for (let i = 0; i < rows.length; i++) {
         // Vérifier si on a besoin d'une nouvelle page
-        if (y + 7 > maxY) {
-          // Ajouter les footers à la page actuelle
-          drawFooter(pdf.internal.getNumberOfPages());
+        const wrappedRow = rows[i].map((cell: string | number | boolean | undefined, idx: number) => {
+          const text = cell === undefined || cell === null ? '' : String(cell);
+          const usableWidth = Math.max(colWidths[idx] - (cellPadding * 2), 8);
+          return pdf.splitTextToSize(text, usableWidth);
+        });
+        const rowLineCount = Math.max(...wrappedRow.map((lines: string[]) => Math.max(lines.length, 1)));
+        const rowHeight = Math.max((rowLineCount * lineHeight) + 2, 7);
+
+        if (y + rowHeight > maxY) {
           // Ajouter une nouvelle page
           pdf.addPage();
           // Dessiner le header de la nouvelle page
@@ -687,7 +740,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
           y = 40;
           // Redessiner les en-têtes du tableau
           pdf.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
-          pdf.rect(15, y, colWidths.reduce((a, b) => a + b, 0), 8, 'F');
+          pdf.rect(15, y, tableWidth, 8, 'F');
 
           pdf.setTextColor(255, 255, 255);
           pdf.setFontSize(fontSize);
@@ -709,17 +762,17 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
         } else {
           pdf.setFillColor(255, 255, 255);
         }
-        pdf.rect(15, y, colWidths.reduce((a, b) => a + b, 0), 7, 'F');
+        pdf.rect(15, y, tableWidth, rowHeight, 'F');
 
         // Texte des cellules
         pdf.setTextColor(50, 50, 50);
         let xPos = 15;
-        rows[i].forEach((cell: string | number | boolean | undefined, idx: number) => {
-          pdf.text(cell.toString(), xPos + cellPadding, y + 5);
+        wrappedRow.forEach((cellLines: string[], idx: number) => {
+          pdf.text(cellLines, xPos + cellPadding, y + 4);
           xPos += colWidths[idx];
         });
 
-        y += 7;
+        y += rowHeight;
       }
 
       return y + 5;
@@ -729,14 +782,21 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
       if (!comment) return y;
 
       pdf.setFillColor(245, 245, 245);
-      const boxHeight = Math.ceil(comment.length / 75) * 5 + 10; // Estimation de la hauteur nécessaire
+      const commentLines = pdf.splitTextToSize(comment, 170);
+      const boxHeight = Math.max((commentLines.length * 5) + 10, 12);
+
+      if (y + boxHeight > 270) {
+        pdf.addPage();
+        drawHeader();
+        y = 45;
+      }
+
       pdf.rect(15, y, 180, boxHeight, 'F');
 
       pdf.setFont('helvetica', 'italic');
       pdf.setTextColor(80, 80, 80);
       pdf.setFontSize(9);
 
-      const commentLines = pdf.splitTextToSize(comment, 170);
       pdf.text(commentLines, 20, y + 5);
 
       return y + boxHeight + 5;
@@ -756,7 +816,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
     const clientInfoTable = [
       ['Nom du client', data.clientInfo.name || 'Non spécifié'],
       ['Email', data.clientInfo.email || 'Non spécifié'],
-      ['Date de démonstration', data.clientInfo.demoDate || 'Non spécifiée']
+      ['Date de démonstration', data.clientInfo.demoDate ? formatDateJJMMAAAA(data.clientInfo.demoDate) : 'Non spécifiée']
     ];
 
     yPosition = drawTable(['Information', 'Détail'], clientInfoTable, yPosition);
@@ -806,7 +866,6 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
 
     // Vérifier si on a besoin d'une nouvelle page pour les fonctionnalités
     if (yPosition > 200) {
-      drawFooter(1);
       pdf.addPage();
       drawHeader();
       yPosition = 45;
@@ -835,7 +894,6 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
     yPosition = addCommentBox(data.features.comments, yPosition);
 
     // Ajouter la deuxième page pour les options matérielles et connexion
-    drawFooter(1);
     pdf.addPage();
     drawHeader();
     yPosition = 45;
@@ -888,7 +946,6 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
 
     // Vérifier si on a besoin d'une nouvelle page pour les médecins
     if (yPosition > 200) {
-      drawFooter(pdf.internal.getNumberOfPages());
       pdf.addPage();
       drawHeader();
       yPosition = 45;
@@ -995,8 +1052,12 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
     
     yPosition += indecisHeight + 15;
 
-    // Ajouter le footer à la dernière page
-    drawFooter(pdf.internal.getNumberOfPages());
+    // Ajouter les footers à la fin pour garantir une pagination correcte
+    const totalPages = pdf.internal.getNumberOfPages();
+    for (let page = 1; page <= totalPages; page++) {
+      pdf.setPage(page);
+      drawFooter(page, totalPages);
+    }
 
     // Générer le fichier PDF
     const fileName = `Démo_${data.selectedDevice}_${data.clientInfo.name}_${new Date().toISOString().split('T')[0]}.pdf`;
