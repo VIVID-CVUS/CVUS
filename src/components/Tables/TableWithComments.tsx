@@ -31,6 +31,8 @@ const TableWithComments: React.FC<Props> = ({
   handleCommentsChange,
   handleCheckboxChange
 }) => {
+  const isEuroData = (value: unknown): boolean => String(value ?? '').includes('€');
+
   return (
     <div className="w-full mb-6 bg-white rounded-lg shadow p-4">
       <h2 className="text-xl font-bold mb-3 text-purple-800">{title}</h2>
@@ -66,7 +68,13 @@ const TableWithComments: React.FC<Props> = ({
                 key={item.id}
                 className={item.value || item.presented ? 'bg-white' : 'bg-gray-200'}
               >
-                <td className="border border-gray-300 p-2 text-center">{item.name}</td>
+                <td
+                  className={`border border-gray-300 p-2 text-center ${
+                    isEuroData(item.name) ? 'font-bold text-purple-700' : ''
+                  }`}
+                >
+                  {item.name}
+                </td>
                 <td className="border border-gray-300 p-2 text-center">
                   <input
                     type="checkbox"
