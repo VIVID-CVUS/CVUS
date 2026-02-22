@@ -63,6 +63,11 @@ interface DeviceData {
 }
 
 type EchoPage = {
+  clientName: string;
+  clientEmail: string;
+  demoDate: string;
+  lieuService: string;
+  generalRemarks: string;
   selectedDevice: string;
   selectedSondes: Sonde[];
   selectedFeatures: Feature[];
@@ -78,6 +83,11 @@ type EchoPage = {
 };
 
 const createEmptyEchoPage = (): EchoPage => ({
+  clientName: '',
+  clientEmail: '',
+  demoDate: '',
+  lieuService: '',
+  generalRemarks: '',
   selectedDevice: '',
   selectedSondes: [],
   selectedFeatures: [],
@@ -95,13 +105,6 @@ const createEmptyEchoPage = (): EchoPage => ({
 function Product(): JSX.Element {
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Information client
-  const [clientName, setClientName] = useState<string>('');
-  const [clientEmail, setClientEmail] = useState<string>('');
-  const [demoDate, setDemoDate] = useState<string>('');
-  const [lieuService, setLieuService] = useState<string>('');
-  const [generalRemarks, setGeneralRemarks] = useState<string>('');
-
   const [echoPages, setEchoPages] = useState<EchoPage[]>([createEmptyEchoPage()]);
   const [activeEchoIndex, setActiveEchoIndex] = useState<number>(0);
 
@@ -114,11 +117,11 @@ function Product(): JSX.Element {
     `Bonjour,\n\nVeuillez trouver ci-joint le rapport de démonstration.`
   );
 
-  useEffect(() => {
-    setEmailBody(`Bonjour,\n\nVeuillez trouver ci-joint le rapport de démonstration pour ${clientName}.`);
-  }, [clientName]);
-
   const activeEcho = echoPages[activeEchoIndex] ?? createEmptyEchoPage();
+
+  useEffect(() => {
+    setEmailBody(`Bonjour,\n\nVeuillez trouver ci-joint le rapport de démonstration pour ${activeEcho.clientName}.`);
+  }, [activeEcho.clientName]);
 
   const updateActiveEcho = (updater: (prev: EchoPage) => EchoPage): void => {
     setEchoPages((prev) => prev.map((page, idx) => (idx === activeEchoIndex ? updater(page) : page)));
@@ -172,11 +175,11 @@ function Product(): JSX.Element {
       .filter((page) => page.selectedDevice)
       .map((page) =>
         prepareData({
-          clientName,
-          clientEmail,
-          demoDate,
-          lieuService,
-          generalRemarks,
+          clientName: page.clientName,
+          clientEmail: page.clientEmail,
+          demoDate: page.demoDate,
+          lieuService: page.lieuService,
+          generalRemarks: page.generalRemarks,
           selectedDevice: page.selectedDevice,
           sondes: page.selectedSondes.map((sonde) => ({
             ...sonde,
@@ -272,18 +275,6 @@ function Product(): JSX.Element {
 
   return (
     <FormContainer formRef={formRef}>
-      <ClientInfo
-        clientName={clientName}
-        clientEmail={clientEmail}
-        demoDate={demoDate}
-        lieuService={lieuService}
-        generalRemarks={generalRemarks}
-        setClientName={setClientName}
-        setClientEmail={setClientEmail}
-        setDemoDate={setDemoDate}
-        setLieuService={setLieuService}
-        setGeneralRemarks={setGeneralRemarks}
-      />
       <div className="mb-4 bg-white rounded-lg shadow p-4">
         <div className="flex flex-wrap gap-2 items-center">
           {echoPages.map((_, index) => (
@@ -302,6 +293,19 @@ function Product(): JSX.Element {
           ))}
         </div>
       </div>
+
+      <ClientInfo
+        clientName={activeEcho.clientName}
+        clientEmail={activeEcho.clientEmail}
+        demoDate={activeEcho.demoDate}
+        lieuService={activeEcho.lieuService}
+        generalRemarks={activeEcho.generalRemarks}
+        setClientName={(value) => updateActiveEcho((prev) => ({ ...prev, clientName: value }))}
+        setClientEmail={(value) => updateActiveEcho((prev) => ({ ...prev, clientEmail: value }))}
+        setDemoDate={(value) => updateActiveEcho((prev) => ({ ...prev, demoDate: value }))}
+        setLieuService={(value) => updateActiveEcho((prev) => ({ ...prev, lieuService: value }))}
+        setGeneralRemarks={(value) => updateActiveEcho((prev) => ({ ...prev, generalRemarks: value }))}
+      />
 
       <MedecinsTable
         promoteur={activeEcho.promoteurNotes}

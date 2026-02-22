@@ -359,13 +359,19 @@ export const exportToExcel = (
     // 4️⃣ Info client et date (sous le bandeau)
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`Client: ${data.clientInfo.name}`, 105, 24, { align: 'center' });
-    pdf.text(
-      `Date: ${formatDateJJMMAAAA(data.clientInfo.demoDate)}`,
-      105,
-      31,
-      { align: 'center' }
-    );
+    let headerTextY = 24;
+    if (data.clientInfo.name?.trim()) {
+      pdf.text(`Client: ${data.clientInfo.name}`, 105, headerTextY, { align: 'center' });
+      headerTextY += 7;
+    }
+    if (data.clientInfo.demoDate?.trim()) {
+      pdf.text(
+        `Date: ${formatDateJJMMAAAA(data.clientInfo.demoDate)}`,
+        105,
+        headerTextY,
+        { align: 'center' }
+      );
+    }
   };
 
 
@@ -461,12 +467,23 @@ export const exportToExcel = (
       pdf.rect(15, y, tableWidth, rowHeight, 'F');
 
       // Texte des cellules
-      pdf.setTextColor(50, 50, 50);
       let xPos = 15;
       wrappedRow.forEach((cellLines: string[], idx: number) => {
+        const cellValue = rows[i][idx] === undefined || rows[i][idx] === null ? '' : String(rows[i][idx]);
+        const isEuroData = cellValue.includes('€');
+
+        pdf.setTextColor(
+          isEuroData ? accentColor[0] : 50,
+          isEuroData ? accentColor[1] : 50,
+          isEuroData ? accentColor[2] : 50
+        );
+        pdf.setFont('helvetica', isEuroData ? 'bold' : 'normal');
         pdf.text(cellLines, xPos + cellPadding, y + 4);
         xPos += colWidths[idx];
       });
+
+      pdf.setTextColor(50, 50, 50);
+      pdf.setFont('helvetica', 'normal');
 
       y += rowHeight;
     }
@@ -497,27 +514,36 @@ export const exportToExcel = (
 
   // Infos client
   let yPosition = 45;
-  const includeClientInfo = options.includeClientInfo !== false;
-  const clientInfoBannerOnly = options.clientInfoBannerOnly === true;
+  const hasClientInfoRows = Boolean(
+    data.clientInfo.name?.trim()
+    || data.clientInfo.email?.trim()
+    || data.clientInfo.demoDate?.trim()
+    || data.clientInfo.lieuService?.trim()
+  );
+  const hasClientRemarks = Boolean(data.clientInfo.generalRemarks?.trim());
+  const includeClientInfo = options.includeClientInfo !== false && (hasClientInfoRows || hasClientRemarks);
   if (includeClientInfo) {
     yPosition = drawSectionTitle('Informations Client', yPosition);
 
-    if (clientInfoBannerOnly) {
-      pdf.setFillColor(255, 255, 255);
-      pdf.rect(15, yPosition, 180, 8, 'F');
-      yPosition += 8;
-    } else {
+    pdf.setTextColor(50, 50, 50);
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
 
-      pdf.setTextColor(50, 50, 50);
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
+    const clientInfoTable: string[][] = [];
+    if (data.clientInfo.name?.trim()) {
+      clientInfoTable.push(['Nom du client', data.clientInfo.name]);
+    }
+    if (data.clientInfo.email?.trim()) {
+      clientInfoTable.push(['Email', data.clientInfo.email]);
+    }
+    if (data.clientInfo.demoDate?.trim()) {
+      clientInfoTable.push(['Date de démonstration', formatDateJJMMAAAA(data.clientInfo.demoDate)]);
+    }
+    if (data.clientInfo.lieuService?.trim()) {
+      clientInfoTable.push(['Lieu/Service', data.clientInfo.lieuService]);
+    }
 
-      const clientInfoTable = [
-        ['Nom du client', data.clientInfo.name || 'Non spécifié'],
-        ['Email', data.clientInfo.email || 'Non spécifié'],
-        ['Date de démonstration', data.clientInfo.demoDate ? formatDateJJMMAAAA(data.clientInfo.demoDate) : 'Non spécifiée'],
-        ['Lieu/Service', data.clientInfo.lieuService || 'Non spécifié']
-      ];
+    if (clientInfoTable.length > 0) {
       const infoHeaders = ['Information', 'Détail'];
       const infoColWidths = [90, 90];
       pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -591,13 +617,9 @@ export const exportToExcel = (
   });
   yPosition += maxAvisHeight;
 
-  if (includeClientInfo && !clientInfoBannerOnly) {
-    pdf.setFillColor(255, 255, 255);
-    pdf.rect(15, yPosition, 180, 8, 'F');
+  if (includeClientInfo && data.clientInfo.generalRemarks?.trim()) {
     yPosition += 8;
-
-    yPosition += 5;
-    const remarquesText = data.clientInfo.generalRemarks || 'Aucune';
+    const remarquesText = data.clientInfo.generalRemarks;
     const remarquesLines = pdf.splitTextToSize(remarquesText, 170) as string[];
     yPosition = drawPaginatedGrayBox({
       pdf,
@@ -791,11 +813,11 @@ export const exportMultipleToExcel = async (dataList: PreparedData[]): Promise<v
   if (!dataList.length) return;
 
   const blobs = dataList
-    .map((data, index) => exportToExcel(data, {
+    .map((data) => exportToExcel(data, {
       skipSave: true,
       returnBlob: true,
       includeClientInfo: true,
-      clientInfoBannerOnly: index > 0,
+      clientInfoBannerOnly: false,
     }))
     .filter(Boolean) as Blob[];
 
@@ -827,11 +849,11 @@ export const exportMultipleToPDF = async (
 
   try {
     const blobs = dataList
-      .map((data, index) => exportToExcel(data, {
+      .map((data) => exportToExcel(data, {
         skipSave: true,
         returnBlob: true,
         includeClientInfo: true,
-        clientInfoBannerOnly: index > 0,
+        clientInfoBannerOnly: false,
       }))
       .filter(Boolean) as Blob[];
 
@@ -900,13 +922,19 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
       // 4️⃣ Info client et date
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'normal');
-      pdf.text(`Client: ${data.clientInfo.name}`, 105, 22, { align: 'center' });
-      pdf.text(
-        `Date: ${formatDateJJMMAAAA(data.clientInfo.demoDate)}`,
-        105,
-        29,
-        { align: 'center' }
-      );
+      let headerTextY = 22;
+      if (data.clientInfo.name?.trim()) {
+        pdf.text(`Client: ${data.clientInfo.name}`, 105, headerTextY, { align: 'center' });
+        headerTextY += 7;
+      }
+      if (data.clientInfo.demoDate?.trim()) {
+        pdf.text(
+          `Date: ${formatDateJJMMAAAA(data.clientInfo.demoDate)}`,
+          105,
+          headerTextY,
+          { align: 'center' }
+        );
+      }
     };
 
 
@@ -1000,12 +1028,23 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
         pdf.rect(15, y, tableWidth, rowHeight, 'F');
 
         // Texte des cellules
-        pdf.setTextColor(50, 50, 50);
         let xPos = 15;
         wrappedRow.forEach((cellLines: string[], idx: number) => {
+          const cellValue = rows[i][idx] === undefined || rows[i][idx] === null ? '' : String(rows[i][idx]);
+          const isEuroData = cellValue.includes('€');
+
+          pdf.setTextColor(
+            isEuroData ? accentColor[0] : 50,
+            isEuroData ? accentColor[1] : 50,
+            isEuroData ? accentColor[2] : 50
+          );
+          pdf.setFont('helvetica', isEuroData ? 'bold' : 'normal');
           pdf.text(cellLines, xPos + cellPadding, y + 4);
           xPos += colWidths[idx];
         });
+
+        pdf.setTextColor(50, 50, 50);
+        pdf.setFont('helvetica', 'normal');
 
         y += rowHeight;
       }
@@ -1036,37 +1075,57 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
 
     // Infos client
     let yPosition = 45;
-    yPosition = drawSectionTitle('Informations Client', yPosition);
+    const hasClientInfoRows = Boolean(
+      data.clientInfo.name?.trim()
+      || data.clientInfo.email?.trim()
+      || data.clientInfo.demoDate?.trim()
+      || data.clientInfo.lieuService?.trim()
+    );
+    const hasClientRemarks = Boolean(data.clientInfo.generalRemarks?.trim());
+    const includeClientInfo = hasClientInfoRows || hasClientRemarks;
+    if (includeClientInfo) {
+      yPosition = drawSectionTitle('Informations Client', yPosition);
 
-    pdf.setTextColor(50, 50, 50);
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(50, 50, 50);
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
 
-    const clientInfoTable = [
-      ['Nom du client', data.clientInfo.name || 'Non spécifié'],
-      ['Email', data.clientInfo.email || 'Non spécifié'],
-      ['Date de démonstration', data.clientInfo.demoDate ? formatDateJJMMAAAA(data.clientInfo.demoDate) : 'Non spécifiée'],
-      ['Lieu/Service', data.clientInfo.lieuService || 'Non spécifié']
-    ];
+      const clientInfoTable: string[][] = [];
+      if (data.clientInfo.name?.trim()) {
+        clientInfoTable.push(['Nom du client', data.clientInfo.name]);
+      }
+      if (data.clientInfo.email?.trim()) {
+        clientInfoTable.push(['Email', data.clientInfo.email]);
+      }
+      if (data.clientInfo.demoDate?.trim()) {
+        clientInfoTable.push(['Date de démonstration', formatDateJJMMAAAA(data.clientInfo.demoDate)]);
+      }
+      if (data.clientInfo.lieuService?.trim()) {
+        clientInfoTable.push(['Lieu/Service', data.clientInfo.lieuService]);
+      }
 
-    yPosition = drawTable(['Information', 'Détail'], clientInfoTable, yPosition);
-    
-    // Remarques générales avec hauteur dynamique
-    yPosition += 5;
-    const remarquesText = data.clientInfo.generalRemarks || 'Aucune';
-    const remarquesLines = pdf.splitTextToSize(remarquesText, 170) as string[];
-    yPosition = drawPaginatedGrayBox({
-      pdf,
-      drawHeader,
-      y: yPosition,
-      lines: remarquesLines,
-      title: 'Remarques générales',
-      firstChunkTopPadding: 12,
-      nextChunksTopPadding: 5,
-      minChunkHeight: 12,
-      chunkGap: 3,
-      blockGap: 7,
-    });
+      if (clientInfoTable.length > 0) {
+        yPosition = drawTable(['Information', 'Détail'], clientInfoTable, yPosition);
+      }
+
+      if (data.clientInfo.generalRemarks?.trim()) {
+        yPosition += 5;
+        const remarquesText = data.clientInfo.generalRemarks;
+        const remarquesLines = pdf.splitTextToSize(remarquesText, 170) as string[];
+        yPosition = drawPaginatedGrayBox({
+          pdf,
+          drawHeader,
+          y: yPosition,
+          lines: remarquesLines,
+          title: 'Remarques générales',
+          firstChunkTopPadding: 12,
+          nextChunksTopPadding: 5,
+          minChunkHeight: 12,
+          chunkGap: 3,
+          blockGap: 7,
+        });
+      }
+    }
 
     // Sondes
     yPosition = drawSectionTitle('Sondes', yPosition);
@@ -1184,7 +1243,8 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
     pdf.setTextColor(50, 50, 50);
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
-
+    if (data.clientInfo.generalRemarks?.trim()) {
+      const remarquesLines = pdf.splitTextToSize(data.clientInfo.generalRemarks, 170) as string[];
 
       // Remarques générales en zone grise
       yPosition += 5;
@@ -1216,6 +1276,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
       pdf.setFillColor(255, 255, 255);
       pdf.rect(15, yPosition, 180, 8, 'F');
       yPosition += 8;
+    }
 
       // Titre violet "Avis des médecins"
       pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
