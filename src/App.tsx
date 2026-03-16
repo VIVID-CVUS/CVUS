@@ -118,6 +118,11 @@ function Product(): JSX.Element {
   );
 
   const activeEcho = echoPages[activeEchoIndex] ?? createEmptyEchoPage();
+  const hasMedecinsAvis = [
+    activeEcho.promoteurNotes,
+    activeEcho.detracteurNotes,
+    activeEcho.indecisNotes,
+  ].some((value) => value.trim());
 
   useEffect(() => {
     setEmailBody(`Bonjour,\n\nVeuillez trouver ci-joint le rapport de démonstration pour ${activeEcho.clientName}.`);
@@ -307,14 +312,16 @@ function Product(): JSX.Element {
         setGeneralRemarks={(value) => updateActiveEcho((prev) => ({ ...prev, generalRemarks: value }))}
       />
 
-      <MedecinsTable
-        promoteur={activeEcho.promoteurNotes}
-        setPromoteur={(v) => updateActiveEcho((prev) => ({ ...prev, promoteurNotes: v }))}
-        detracteur={activeEcho.detracteurNotes}
-        setDetracteur={(v) => updateActiveEcho((prev) => ({ ...prev, detracteurNotes: v }))}
-        indecis={activeEcho.indecisNotes}
-        setIndecis={(v) => updateActiveEcho((prev) => ({ ...prev, indecisNotes: v }))}
-      />
+      {hasMedecinsAvis ? (
+        <MedecinsTable
+          promoteur={activeEcho.promoteurNotes}
+          setPromoteur={(v) => updateActiveEcho((prev) => ({ ...prev, promoteurNotes: v }))}
+          detracteur={activeEcho.detracteurNotes}
+          setDetracteur={(v) => updateActiveEcho((prev) => ({ ...prev, detracteurNotes: v }))}
+          indecis={activeEcho.indecisNotes}
+          setIndecis={(v) => updateActiveEcho((prev) => ({ ...prev, indecisNotes: v }))}
+        />
+      )}
       <ProductSelect
         selectedDevice={activeEcho.selectedDevice}
         setSelectedDevice={(device) => updateActiveEcho((prev) => ({ ...prev, selectedDevice: device }))}
