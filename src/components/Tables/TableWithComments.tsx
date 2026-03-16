@@ -32,6 +32,16 @@ const TableWithComments: React.FC<Props> = ({
   handleCheckboxChange
 }) => {
   const isEuroData = (value: unknown): boolean => String(value ?? '').includes('€');
+  const hasCopiedPresentedSelection =
+    data.length > 0 &&
+    data.every((item) => Boolean(item.appreciated) === Boolean(item.presented)) &&
+    data.some((item) => Boolean(item.appreciated));
+  const hasInversePresentedSelection =
+    data.length > 0 &&
+    data.every(
+      (item) => Boolean(item.wanted) === (Boolean(item.presented) && !Boolean(item.appreciated))
+    ) &&
+    data.some((item) => Boolean(item.wanted));
 
   return (
     <div className="w-full mb-6 bg-white rounded-lg shadow p-4">
@@ -57,8 +67,50 @@ const TableWithComments: React.FC<Props> = ({
                 </button>
               </div>
             </th>
-            <th className="bg-purple-800 text-white font-bold p-2 text-center border border-gray-300">Souhaité par le client</th>
-            <th className="bg-purple-800 text-white font-bold p-2 text-center border border-gray-300">Non Souhaité par le client</th>
+            <th className="bg-purple-800 text-white font-bold p-2 text-center border border-gray-300">
+              <div className="flex flex-col items-center gap-1">
+                <span>Souhaité par le client</span>
+                <button
+                  type="button"
+                  className="text-xs bg-white text-purple-800 px-2 py-0.5 rounded font-semibold hover:bg-gray-100"
+                  onClick={() => {
+                    data.forEach((item) => {
+                      handleCheckboxChange(
+                        section,
+                        item.id,
+                        'appreciated',
+                        hasCopiedPresentedSelection ? false : Boolean(item.presented)
+                      );
+                    });
+                  }}
+                >
+                  Copie
+                </button>
+              </div>
+            </th>
+            <th className="bg-purple-800 text-white font-bold p-2 text-center border border-gray-300">
+              <div className="flex flex-col items-center gap-1">
+                <span>Non Souhaité par le client</span>
+                <button
+                  type="button"
+                  className="text-xs bg-white text-purple-800 px-2 py-0.5 rounded font-semibold hover:bg-gray-100"
+                  onClick={() => {
+                    data.forEach((item) => {
+                      handleCheckboxChange(
+                        section,
+                        item.id,
+                        'wanted',
+                        hasInversePresentedSelection
+                          ? false
+                          : Boolean(item.presented) && !Boolean(item.appreciated)
+                      );
+                    });
+                  }}
+                >
+                  Inverse
+                </button>
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
