@@ -575,47 +575,55 @@ export const exportToExcel = (
   }
 
   // Tableau médecins
-  // Tableau horizontal "Avis des médecins"
-  const avisHeaders = ['Promoteur', 'Rétracteur', 'Indécis'];
-  const avisRow = [
-    data.medecins.promoteur || 'Aucun',
-    data.medecins.detracteur || 'Aucun',
-    data.medecins.indecis || 'Aucun'
-  ];
-  // Largeur totale 180mm, 3 colonnes égales
-  const avisColWidths = [60, 60, 60]; // total 180mm, aligné avec le tableau client
-  // Calculer la hauteur max nécessaire
-  const avisLinesArr = avisRow.map((avis, i) => pdf.splitTextToSize(avis, avisColWidths[i] - 6));
-  const maxAvisHeight = Math.max(...avisLinesArr.map(lines => lines.length * 5 + 8));
-  yPosition = ensureVerticalSpace(pdf, drawHeader, yPosition, 8 + maxAvisHeight);
-  // En-tête violet
-  pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  pdf.rect(15, yPosition, 180, 8, 'F');
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'bold');
-  let xAvis = 15;
-  avisHeaders.forEach((header, i) => {
-    pdf.text(header, xAvis + 3, yPosition + 5);
-    xAvis += avisColWidths[i];
-  });
-  yPosition += 8;
-  // Ligne d'avis, hauteur max
-  pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(50, 50, 50);
-  let xAvisVal = 15;
-  avisLinesArr.forEach((avisLines, i) => {
-    // Promoteur et Indécis : gris, Rétracteur : blanc
-    if (i === 1) {
-      pdf.setFillColor(255, 255, 255); // Rétracteur en blanc
-    } else {
-      pdf.setFillColor(245, 245, 245); // Autres en gris
-    }
-    pdf.rect(xAvisVal, yPosition, avisColWidths[i], maxAvisHeight, 'F');
-    pdf.text(avisLines, xAvisVal + 3, yPosition + 6);
-    xAvisVal += avisColWidths[i];
-  });
-  yPosition += maxAvisHeight;
+  const hasMedecinsAvis = [
+    data.medecins.promoteur,
+    data.medecins.detracteur,
+    data.medecins.indecis,
+  ].some((value) => value?.trim());
+
+  if (hasMedecinsAvis) {
+    // Tableau horizontal "Avis des médecins"
+    const avisHeaders = ['Promoteur', 'Rétracteur', 'Indécis'];
+    const avisRow = [
+      data.medecins.promoteur || 'Aucun',
+      data.medecins.detracteur || 'Aucun',
+      data.medecins.indecis || 'Aucun'
+    ];
+    // Largeur totale 180mm, 3 colonnes égales
+    const avisColWidths = [60, 60, 60]; // total 180mm, aligné avec le tableau client
+    // Calculer la hauteur max nécessaire
+    const avisLinesArr = avisRow.map((avis, i) => pdf.splitTextToSize(avis, avisColWidths[i] - 6));
+    const maxAvisHeight = Math.max(...avisLinesArr.map(lines => lines.length * 5 + 8));
+    yPosition = ensureVerticalSpace(pdf, drawHeader, yPosition, 8 + maxAvisHeight);
+    // En-tête violet
+    pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    pdf.rect(15, yPosition, 180, 8, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'bold');
+    let xAvis = 15;
+    avisHeaders.forEach((header, i) => {
+      pdf.text(header, xAvis + 3, yPosition + 5);
+      xAvis += avisColWidths[i];
+    });
+    yPosition += 8;
+    // Ligne d'avis, hauteur max
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(50, 50, 50);
+    let xAvisVal = 15;
+    avisLinesArr.forEach((avisLines, i) => {
+      // Promoteur et Indécis : gris, Rétracteur : blanc
+      if (i === 1) {
+        pdf.setFillColor(255, 255, 255); // Rétracteur en blanc
+      } else {
+        pdf.setFillColor(245, 245, 245); // Autres en gris
+      }
+      pdf.rect(xAvisVal, yPosition, avisColWidths[i], maxAvisHeight, 'F');
+      pdf.text(avisLines, xAvisVal + 3, yPosition + 6);
+      xAvisVal += avisColWidths[i];
+    });
+    yPosition += maxAvisHeight;
+  }
 
   if (includeClientInfo && data.clientInfo.generalRemarks?.trim()) {
     yPosition += 8;
@@ -1278,6 +1286,13 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
       yPosition += 8;
     }
 
+    const hasMedecinsAvis = [
+      data.medecins.promoteur,
+      data.medecins.detracteur,
+      data.medecins.indecis,
+    ].some((value) => value?.trim());
+
+    if (hasMedecinsAvis) {
       // Titre violet "Avis des médecins"
       pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       pdf.rect(15, yPosition, 180, 10, 'F');
@@ -1323,24 +1338,25 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
         xAvisVal += avisColWidths[i];
       });
       yPosition += maxAvisHeight;
-    
-    // yPosition += detracteurHeight + 5; // Removed undefined variable, already handled by maxAvisHeight above
 
-    // Indécis
-    const indecisText = data.medecins.indecis || 'Aucun';
-    const indecisLines = pdf.splitTextToSize(indecisText, 170) as string[];
-    yPosition = drawPaginatedGrayBox({
-      pdf,
-      drawHeader,
-      y: yPosition,
-      lines: indecisLines,
-      title: 'Indécis',
-      firstChunkTopPadding: 12,
-      nextChunksTopPadding: 5,
-      minChunkHeight: 12,
-      chunkGap: 3,
-      blockGap: 12,
-    });
+      // yPosition += detracteurHeight + 5; // Removed undefined variable, already handled by maxAvisHeight above
+
+      // Indécis
+      const indecisText = data.medecins.indecis || 'Aucun';
+      const indecisLines = pdf.splitTextToSize(indecisText, 170) as string[];
+      yPosition = drawPaginatedGrayBox({
+        pdf,
+        drawHeader,
+        y: yPosition,
+        lines: indecisLines,
+        title: 'Indécis',
+        firstChunkTopPadding: 12,
+        nextChunksTopPadding: 5,
+        minChunkHeight: 12,
+        chunkGap: 3,
+        blockGap: 12,
+      });
+    }
 
     // Ajouter les footers à la fin pour garantir une pagination correcte
     const totalPages = pdf.internal.getNumberOfPages();
