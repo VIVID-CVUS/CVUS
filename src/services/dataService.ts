@@ -40,6 +40,17 @@ const formatDateJJMMAAAA = (dateValue?: string): string => {
   return dateValue;
 };
 
+const normalizeTextForPdf = (value: string): string => {
+  return value
+    .normalize('NFKC')
+    .replace(/\r\n/g, '\n')
+    .replace(/[\u00A0\u202F\u2007]/g, ' ')
+    .replace(/[\u2018\u2019\u2032]/g, "'")
+    .replace(/[\u201C\u201D\u2033]/g, '"')
+    .replace(/[\u2010\u2011\u2012\u2013\u2014\u2212]/g, '-')
+    .replace(/\u2026/g, '...');
+};
+
 // Type de données pour la présentation des éléments
 export type PresentedItem = {
   name: string;
@@ -426,7 +437,7 @@ export const exportToExcel = (
     for (let i = 0; i < rows.length; i++) {
       // Vérifier si on a besoin d'une nouvelle page
       const wrappedRow = rows[i].map((cell: string | number | boolean | undefined, idx: number) => {
-        const text = cell === undefined || cell === null ? '' : String(cell);
+        const text = cell === undefined || cell === null ? '' : normalizeTextForPdf(String(cell));
         const usableWidth = Math.max(colWidths[idx] - (cellPadding * 2), 8);
         return pdf.splitTextToSize(text, usableWidth);
       });
@@ -469,7 +480,9 @@ export const exportToExcel = (
       // Texte des cellules
       let xPos = 15;
       wrappedRow.forEach((cellLines: string[], idx: number) => {
-        const cellValue = rows[i][idx] === undefined || rows[i][idx] === null ? '' : String(rows[i][idx]);
+        const cellValue = rows[i][idx] === undefined || rows[i][idx] === null
+          ? ''
+          : normalizeTextForPdf(String(rows[i][idx]));
         const isEuroData = cellValue.includes('€');
 
         pdf.setTextColor(
@@ -494,7 +507,8 @@ export const exportToExcel = (
   const addCommentBox = (comment: string | undefined, y: number) => {
     if (!comment?.trim()) return y;
 
-    const commentLines = pdf.splitTextToSize(comment, 170) as string[];
+    const safeComment = normalizeTextForPdf(comment);
+    const commentLines = pdf.splitTextToSize(safeComment, 170) as string[];
     return drawPaginatedGrayBox({
       pdf,
       drawHeader,
@@ -561,10 +575,12 @@ export const exportToExcel = (
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(50, 50, 50);
       clientInfoTable.forEach((row, idx) => {
+        const safeLabel = normalizeTextForPdf(row[0]);
+        const safeValue = normalizeTextForPdf(row[1]);
         pdf.setFillColor(idx % 2 === 0 ? 245 : 245, 245, 245);
         pdf.rect(15, yPosition, 180, 8, 'F');
-        pdf.text(row[0], 18, yPosition + 5);
-        pdf.text(row[1], 105, yPosition + 5);
+        pdf.text(safeLabel, 18, yPosition + 5);
+        pdf.text(safeValue, 105, yPosition + 5);
         yPosition += 8;
       });
 
@@ -585,9 +601,9 @@ export const exportToExcel = (
     // Tableau horizontal "Avis des médecins"
     const avisHeaders = ['Promoteur', 'Rétracteur', 'Indécis'];
     const avisRow = [
-      data.medecins.promoteur || 'Aucun',
-      data.medecins.detracteur || 'Aucun',
-      data.medecins.indecis || 'Aucun'
+      normalizeTextForPdf(data.medecins.promoteur || 'Aucun'),
+      normalizeTextForPdf(data.medecins.detracteur || 'Aucun'),
+      normalizeTextForPdf(data.medecins.indecis || 'Aucun')
     ];
     // Largeur totale 180mm, 3 colonnes égales
     const avisColWidths = [60, 60, 60]; // total 180mm, aligné avec le tableau client
@@ -627,7 +643,7 @@ export const exportToExcel = (
 
   if (includeClientInfo && data.clientInfo.generalRemarks?.trim()) {
     yPosition += 8;
-    const remarquesText = data.clientInfo.generalRemarks;
+    const remarquesText = normalizeTextForPdf(data.clientInfo.generalRemarks);
     const remarquesLines = pdf.splitTextToSize(remarquesText, 170) as string[];
     yPosition = drawPaginatedGrayBox({
       pdf,
@@ -995,7 +1011,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
       for (let i = 0; i < rows.length; i++) {
         // Vérifier si on a besoin d'une nouvelle page
         const wrappedRow = rows[i].map((cell: string | number | boolean | undefined, idx: number) => {
-          const text = cell === undefined || cell === null ? '' : String(cell);
+          const text = cell === undefined || cell === null ? '' : normalizeTextForPdf(String(cell));
           const usableWidth = Math.max(colWidths[idx] - (cellPadding * 2), 8);
           return pdf.splitTextToSize(text, usableWidth);
         });
@@ -1038,7 +1054,9 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
         // Texte des cellules
         let xPos = 15;
         wrappedRow.forEach((cellLines: string[], idx: number) => {
-          const cellValue = rows[i][idx] === undefined || rows[i][idx] === null ? '' : String(rows[i][idx]);
+          const cellValue = rows[i][idx] === undefined || rows[i][idx] === null
+            ? ''
+            : normalizeTextForPdf(String(rows[i][idx]));
           const isEuroData = cellValue.includes('€');
 
           pdf.setTextColor(
@@ -1063,7 +1081,8 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
     const addCommentBox = (comment: string | undefined, y: number) => {
       if (!comment?.trim()) return y;
 
-      const commentLines = pdf.splitTextToSize(comment, 170) as string[];
+      const safeComment = normalizeTextForPdf(comment);
+      const commentLines = pdf.splitTextToSize(safeComment, 170) as string[];
       return drawPaginatedGrayBox({
         pdf,
         drawHeader,
@@ -1118,7 +1137,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
 
       if (data.clientInfo.generalRemarks?.trim()) {
         yPosition += 5;
-        const remarquesText = data.clientInfo.generalRemarks;
+        const remarquesText = normalizeTextForPdf(data.clientInfo.generalRemarks);
         const remarquesLines = pdf.splitTextToSize(remarquesText, 170) as string[];
         yPosition = drawPaginatedGrayBox({
           pdf,
@@ -1252,7 +1271,8 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
     if (data.clientInfo.generalRemarks?.trim()) {
-      const remarquesLines = pdf.splitTextToSize(data.clientInfo.generalRemarks, 170) as string[];
+      const remarquesText = normalizeTextForPdf(data.clientInfo.generalRemarks);
+      const remarquesLines = pdf.splitTextToSize(remarquesText, 170) as string[];
 
       // Remarques générales en zone grise
       yPosition += 5;
@@ -1305,9 +1325,9 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
       // Tableau horizontal "Avis des médecins"
       const avisHeaders = ['Promoteur', 'Rétracteur', 'Indécis'];
       const avisRow = [
-        data.medecins.promoteur || 'Aucun',
-        data.medecins.detracteur || 'Aucun',
-        data.medecins.indecis || 'Aucun'
+        normalizeTextForPdf(data.medecins.promoteur || 'Aucun'),
+        normalizeTextForPdf(data.medecins.detracteur || 'Aucun'),
+        normalizeTextForPdf(data.medecins.indecis || 'Aucun')
       ];
       // Largeur totale 180mm, 3 colonnes égales
       const avisColWidths = [60, 60, 60];
@@ -1342,7 +1362,7 @@ export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<H
       // yPosition += detracteurHeight + 5; // Removed undefined variable, already handled by maxAvisHeight above
 
       // Indécis
-      const indecisText = data.medecins.indecis || 'Aucun';
+      const indecisText = normalizeTextForPdf(data.medecins.indecis || 'Aucun');
       const indecisLines = pdf.splitTextToSize(indecisText, 170) as string[];
       yPosition = drawPaginatedGrayBox({
         pdf,
