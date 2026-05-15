@@ -125,7 +125,7 @@ type ExtendedJsPDF = jsPDF & {
 };
 
 const CONTENT_TOP_Y = 45;
-const CONTENT_BOTTOM_Y = 270;
+const CONTENT_BOTTOM_Y = 285;
 
 type DrawHeaderFn = () => void;
 
@@ -198,14 +198,23 @@ const drawPaginatedGrayBox = ({
   while (lineIndex < lines.length) {
     const topPadding = isFirstChunk ? firstChunkTopPadding : nextChunksTopPadding;
     const availableHeight = CONTENT_BOTTOM_Y - currentY;
-    const maxLinesForPage = Math.max(
-      Math.floor((availableHeight - topPadding - 5) / lineHeight),
-      1
-    );
+    const textBoxWidth = 170;
+    const mmPerPoint = 0.352778;
+    const lineHeightFactor = lineHeight / (bodyFontSize * mmPerPoint);
+    const fontHeightMm = bodyFontSize * mmPerPoint;
+    
+    // Utiliser toute la place disponible pour le texte
+    const maxLinesForPage = Math.max(1, Math.floor((availableHeight - topPadding) / lineHeight));
+    
     const chunk = lines.slice(lineIndex, lineIndex + maxLinesForPage);
-    const chunkHeight = Math.max((chunk.length * lineHeight) + topPadding, minChunkHeight);
+    // Hauteur réelle du texte (baseline-to-baseline + dernière ligne) pour éviter le fond gris en trop.
+    const textHeight = chunk.length > 0
+      ? ((chunk.length - 1) * lineHeight) + fontHeightMm
+      : 0;
+    const chunkHeight = Math.max(textHeight + topPadding + 1, minChunkHeight);
 
-    if (currentY + chunkHeight > CONTENT_BOTTOM_Y) {
+    // Si le contenu ne rentre pas, sauter à la page suivante
+    if (currentY + chunkHeight > CONTENT_BOTTOM_Y && currentY > CONTENT_TOP_Y) {
       currentY = addPageWithHeader(pdf, drawHeader);
       continue;
     }
@@ -223,13 +232,18 @@ const drawPaginatedGrayBox = ({
     pdf.setFont('helvetica', bodyFontStyle);
     pdf.setTextColor(bodyTextColor[0], bodyTextColor[1], bodyTextColor[2]);
     pdf.setFontSize(bodyFontSize);
-    pdf.text(chunk, textX, currentY + topPadding);
+    pdf.text(chunk.join('\n'), textX, currentY + topPadding, {
+      align: 'justify',
+      maxWidth: textBoxWidth,
+      lineHeightFactor,
+    });
 
-    currentY += chunkHeight + chunkGap;
+    currentY += chunkHeight;
     lineIndex += chunk.length;
     isFirstChunk = false;
 
     if (lineIndex < lines.length) {
+      currentY += chunkGap;
       currentY = addPageWithHeader(pdf, drawHeader);
     }
   }
@@ -509,7 +523,7 @@ export const exportToExcel = (
 
     const safeComment = normalizeTextForPdf(comment);
     const commentLines = pdf.splitTextToSize(safeComment, 170) as string[];
-    return drawPaginatedGrayBox({
+    const newY = drawPaginatedGrayBox({
       pdf,
       drawHeader,
       y,
@@ -521,6 +535,9 @@ export const exportToExcel = (
       chunkGap: 3,
       blockGap: 2,
     });
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(15, newY, 180, 5, 'F');
+    return newY + 5;
   };
 
   // Première page
@@ -625,7 +642,11 @@ export const exportToExcel = (
     yPosition += 8;
     // Ligne d'avis, hauteur max
     pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
     pdf.setTextColor(50, 50, 50);
+    const avisLineHeight = 5;
+    const avisMmPerPoint = 0.352778;
+    const avisLineHeightFactor = avisLineHeight / (10 * avisMmPerPoint);
     let xAvisVal = 15;
     avisLinesArr.forEach((avisLines, i) => {
       // Promoteur et Indécis : gris, Rétracteur : blanc
@@ -635,36 +656,44 @@ export const exportToExcel = (
         pdf.setFillColor(245, 245, 245); // Autres en gris
       }
       pdf.rect(xAvisVal, yPosition, avisColWidths[i], maxAvisHeight, 'F');
-      pdf.text(avisLines, xAvisVal + 3, yPosition + 6);
+      pdf.text(avisLines.join('\n'), xAvisVal + 3, yPosition + 6, {
+        align: 'justify',
+        maxWidth: avisColWidths[i] - 6,
+        lineHeightFactor: avisLineHeightFactor,
+      });
       xAvisVal += avisColWidths[i];
     });
     yPosition += maxAvisHeight;
+    yPosition += 8;
   }
 
   if (includeClientInfo && data.clientInfo.generalRemarks?.trim()) {
-    yPosition += 8;
+    yPosition += 3;
     const remarquesText = normalizeTextForPdf(data.clientInfo.generalRemarks);
     const remarquesLines = pdf.splitTextToSize(remarquesText, 170) as string[];
+    
     yPosition = drawPaginatedGrayBox({
       pdf,
       drawHeader,
       y: yPosition,
       lines: remarquesLines,
       title: 'Remarques générales',
-      firstChunkTopPadding: 12,
+      bodyFontStyle: 'italic',
+      firstChunkTopPadding: 9,
       nextChunksTopPadding: 5,
-      minChunkHeight: 12,
+      minChunkHeight: 0,
       chunkGap: 3,
-      blockGap: 2,
+      blockGap: 0,
+      titleY: 4,
     });
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(15, yPosition, 180, 7, 'F');
+    yPosition += 7;
   }
 
-  // Ajout d'un espace blanc avant le bandeau Sondes
-  pdf.setFillColor(255, 255, 255);
-  pdf.rect(15, yPosition, 180, 8, 'F');
-  yPosition += 8;
-
   // Sondes
+  // drawSectionTitle dessine le bandeau à yPos - 6, on compense pour conserver 5mm blancs visibles.
+  yPosition += 6;
   yPosition = drawSectionTitle('Sondes', yPosition);
 
   const sondesHeaders = ['Sonde', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
@@ -685,16 +714,10 @@ export const exportToExcel = (
 
   yPosition = drawTable(sondesHeaders, sondesRows, yPosition);
   yPosition = addCommentBox(data.sondes.comments, yPosition);
-  yPosition += 10;
-
-  // Vérifier si on a besoin d'une nouvelle page pour les fonctionnalités
-  if (yPosition > 200) {
-    pdf.addPage();
-    drawHeader();
-    yPosition = 45;
-  }
+  yPosition += 2;
 
   // Fonctionnalités
+  yPosition += 3;
   yPosition = drawSectionTitle('Option Software', yPosition);
 
   const featuresHeaders = ['Option Software', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
@@ -715,13 +738,10 @@ export const exportToExcel = (
 
   yPosition = drawTable(featuresHeaders, featuresRows, yPosition);
   yPosition = addCommentBox(data.features.comments, yPosition);
-
-  // Ajouter la deuxième page pour les options matérielles et connexion
-  pdf.addPage();
-  drawHeader();
-  yPosition = 45;
+  yPosition += 2;
 
   // Options matérielles
+  yPosition += 3;
   yPosition = drawSectionTitle('Option Hardware', yPosition);
 
   const hardwareHeaders = ['Option Hardware', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
@@ -742,9 +762,10 @@ export const exportToExcel = (
 
   yPosition = drawTable(hardwareHeaders, hardwareRows, yPosition);
   yPosition = addCommentBox(data.hardware.comments, yPosition);
-  yPosition += 10;
+  yPosition += 2;
 
   // Options de connexion
+  yPosition += 3;
   yPosition = drawSectionTitle('Connectivité et imprimante', yPosition);
 
   const connexHeaders = ['Connectivité et imprimante', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
@@ -900,511 +921,6 @@ export const exportMultipleToPDF = async (
     alert('Une erreur s\'est produite lors de la génération du PDF multi.');
   } finally {
     document.body.removeChild(loadingDiv);
-  }
-};
-
-export const exportToPDF = async (data: PreparedData, formRef: React.RefObject<HTMLFormElement>) => {
-  if (!formRef.current) return;
-
-  try {
-    const loadingDiv = document.createElement('div');
-    loadingDiv.style.position = 'fixed';
-    loadingDiv.style.top = '0';
-    loadingDiv.style.left = '0';
-    loadingDiv.style.width = '100%';
-    loadingDiv.style.height = '100%';
-    loadingDiv.style.backgroundColor = 'rgba(0,0,0,0.5)';
-    loadingDiv.style.display = 'flex';
-    loadingDiv.style.justifyContent = 'center';
-    loadingDiv.style.alignItems = 'center';
-    loadingDiv.style.zIndex = '9999';
-    loadingDiv.innerHTML = '<div style="background: white; padding: 20px; border-radius: 5px;">Génération du PDF en cours...</div>';
-    document.body.appendChild(loadingDiv);
-
-    // Use type assertion to handle the incompatible types
-    const pdf = new jsPDF('p', 'mm', 'a4') as unknown as ExtendedJsPDF;
-
-    // Fonctionnalités pour créer un PDF
-    const drawHeader = () => {
-      // 1️⃣ Fond violet
-      pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      pdf.rect(0, 0, 210, 35, 'F');
-
-      // 2️⃣ Logo GE Healthcare
-      //    si logoPng est une URL, convertissez-le en base64 avant (ex: fetch -> blob -> FileReader)
-      //    ici on suppose logoPng est déjà une data:URL "data:image/png;base64,...."
-      const logoWidth = 40;   // largeur en mm
-      const logoHeight = 10;  // hauteur en mm, ajustez selon votre image
-      pdf.addImage(logoPng, 'PNG', 10, 10, logoWidth, logoHeight);
-
-      // 3️⃣ Titre de la démo, centré
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(18);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(`Démonstration ${data.selectedDevice}`, 105, 15, { align: 'center' });
-
-      // 4️⃣ Info client et date
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'normal');
-      let headerTextY = 22;
-      if (data.clientInfo.name?.trim()) {
-        pdf.text(`Client: ${data.clientInfo.name}`, 105, headerTextY, { align: 'center' });
-        headerTextY += 7;
-      }
-      if (data.clientInfo.demoDate?.trim()) {
-        pdf.text(
-          `Date: ${formatDateJJMMAAAA(data.clientInfo.demoDate)}`,
-          105,
-          headerTextY,
-          { align: 'center' }
-        );
-      }
-    };
-
-
-    const drawFooter = (pageNumber: number, totalPages: number) => {
-      pdf.setFillColor(240, 240, 240);
-      pdf.rect(0, 287, 210, 10, 'F');
-      pdf.setTextColor(100, 100, 100);
-      pdf.setFontSize(8);
-      pdf.text(`GE Healthcare - Rapport de démonstration - Page ${pageNumber}/${totalPages}`, 105, 293, { align: 'center' });
-    };
-
-    const drawSectionTitle = (title: string, yPos: number) => {
-      yPos = ensureVerticalSpace(pdf, drawHeader, yPos, 10);
-
-      pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      pdf.rect(10, yPos - 6, 190, 10, 'F');
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(title, 15, yPos);
-      return yPos + 10;
-    };
-
-    const drawTable = (headers: string[], rows: (string | number | boolean | undefined)[][], startY: number, maxY: number = 270) => {
-      const cellPadding = 3;
-      const fontSize = 9;
-      const lineHeight = 4;
-      const colWidths = [80, 30, 30, 30]; // Ajustez selon vos besoins
-      const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-      let y = startY;
-
-      // En-têtes du tableau
-      pdf.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
-      pdf.rect(15, y, tableWidth, 8, 'F');
-
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(fontSize);
-      pdf.setFont('helvetica', 'bold');
-
-      let x = 15;
-      headers.forEach((header: string, i: number) => {
-        pdf.text(header, x + cellPadding, y + 5);
-        x += colWidths[i];
-      });
-
-      y += 8;
-
-      // Corps du tableau
-      pdf.setFont('helvetica', 'normal');
-      for (let i = 0; i < rows.length; i++) {
-        // Vérifier si on a besoin d'une nouvelle page
-        const wrappedRow = rows[i].map((cell: string | number | boolean | undefined, idx: number) => {
-          const text = cell === undefined || cell === null ? '' : normalizeTextForPdf(String(cell));
-          const usableWidth = Math.max(colWidths[idx] - (cellPadding * 2), 8);
-          return pdf.splitTextToSize(text, usableWidth);
-        });
-        const rowLineCount = Math.max(...wrappedRow.map((lines: string[]) => Math.max(lines.length, 1)));
-        const rowHeight = Math.max((rowLineCount * lineHeight) + 2, 7);
-
-        if (y + rowHeight > maxY) {
-          // Ajouter une nouvelle page
-          pdf.addPage();
-          // Dessiner le header de la nouvelle page
-          drawHeader();
-          // Réinitialiser la position Y
-          y = 40;
-          // Redessiner les en-têtes du tableau
-          pdf.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
-          pdf.rect(15, y, tableWidth, 8, 'F');
-
-          pdf.setTextColor(255, 255, 255);
-          pdf.setFontSize(fontSize);
-          pdf.setFont('helvetica', 'bold');
-
-          x = 15;
-          headers.forEach((header: string, idx: number) => {
-            pdf.text(header, x + cellPadding, y + 5);
-            x += colWidths[idx];
-          });
-
-          y += 8;
-          pdf.setFont('helvetica', 'normal');
-        }
-
-        // Alterner les couleurs de fond des lignes
-        if (i % 2 === 0) {
-          pdf.setFillColor(240, 240, 240);
-        } else {
-          pdf.setFillColor(255, 255, 255);
-        }
-        pdf.rect(15, y, tableWidth, rowHeight, 'F');
-
-        // Texte des cellules
-        let xPos = 15;
-        wrappedRow.forEach((cellLines: string[], idx: number) => {
-          const cellValue = rows[i][idx] === undefined || rows[i][idx] === null
-            ? ''
-            : normalizeTextForPdf(String(rows[i][idx]));
-          const isEuroData = cellValue.includes('€');
-
-          pdf.setTextColor(
-            isEuroData ? accentColor[0] : 50,
-            isEuroData ? accentColor[1] : 50,
-            isEuroData ? accentColor[2] : 50
-          );
-          pdf.setFont('helvetica', isEuroData ? 'bold' : 'normal');
-          pdf.text(cellLines, xPos + cellPadding, y + 4);
-          xPos += colWidths[idx];
-        });
-
-        pdf.setTextColor(50, 50, 50);
-        pdf.setFont('helvetica', 'normal');
-
-        y += rowHeight;
-      }
-
-      return y + 5;
-    };
-
-    const addCommentBox = (comment: string | undefined, y: number) => {
-      if (!comment?.trim()) return y;
-
-      const safeComment = normalizeTextForPdf(comment);
-      const commentLines = pdf.splitTextToSize(safeComment, 170) as string[];
-      return drawPaginatedGrayBox({
-        pdf,
-        drawHeader,
-        y,
-        lines: commentLines,
-        bodyFontStyle: 'italic',
-        firstChunkTopPadding: 5,
-        nextChunksTopPadding: 5,
-        minChunkHeight: 12,
-        chunkGap: 3,
-        blockGap: 2,
-      });
-    };
-
-    // Première page
-    drawHeader();
-
-    // Infos client
-    let yPosition = 45;
-    const hasClientInfoRows = Boolean(
-      data.clientInfo.name?.trim()
-      || data.clientInfo.email?.trim()
-      || data.clientInfo.demoDate?.trim()
-      || data.clientInfo.lieuService?.trim()
-    );
-    const hasClientRemarks = Boolean(data.clientInfo.generalRemarks?.trim());
-    const includeClientInfo = hasClientInfoRows || hasClientRemarks;
-    if (includeClientInfo) {
-      yPosition = drawSectionTitle('Informations Client', yPosition);
-
-      pdf.setTextColor(50, 50, 50);
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-
-      const clientInfoTable: string[][] = [];
-      if (data.clientInfo.name?.trim()) {
-        clientInfoTable.push(['Nom du client', data.clientInfo.name]);
-      }
-      if (data.clientInfo.email?.trim()) {
-        clientInfoTable.push(['Email', data.clientInfo.email]);
-      }
-      if (data.clientInfo.demoDate?.trim()) {
-        clientInfoTable.push(['Date de démonstration', formatDateJJMMAAAA(data.clientInfo.demoDate)]);
-      }
-      if (data.clientInfo.lieuService?.trim()) {
-        clientInfoTable.push(['Lieu/Service', data.clientInfo.lieuService]);
-      }
-
-      if (clientInfoTable.length > 0) {
-        yPosition = drawTable(['Information', 'Détail'], clientInfoTable, yPosition);
-      }
-
-      if (data.clientInfo.generalRemarks?.trim()) {
-        yPosition += 5;
-        const remarquesText = normalizeTextForPdf(data.clientInfo.generalRemarks);
-        const remarquesLines = pdf.splitTextToSize(remarquesText, 170) as string[];
-        yPosition = drawPaginatedGrayBox({
-          pdf,
-          drawHeader,
-          y: yPosition,
-          lines: remarquesLines,
-          title: 'Remarques générales',
-          firstChunkTopPadding: 12,
-          nextChunksTopPadding: 5,
-          minChunkHeight: 12,
-          chunkGap: 3,
-          blockGap: 7,
-        });
-      }
-    }
-
-    // Sondes
-    yPosition = drawSectionTitle('Sondes', yPosition);
-
-    const sondesHeaders = ['Sonde', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
-    const sondesRows = [];
-
-    if (data.sondes.data && data.sondes.data.length > 0) {
-      data.sondes.data.forEach(sonde => {
-        sondesRows.push([
-          sonde.name,
-          sonde.presented ? 'oui' : 'non',
-          sonde.appreciated ? 'oui' : 'non',
-          sonde.wanted ? 'oui' : 'non'
-        ]);
-      });
-    } else {
-      sondesRows.push(['Aucune sonde sélectionnée', '', '', '']);
-    }
-
-    yPosition = drawTable(sondesHeaders, sondesRows, yPosition);
-    yPosition = addCommentBox(data.sondes.comments, yPosition);
-    yPosition += 10;
-
-    // Vérifier si on a besoin d'une nouvelle page pour les fonctionnalités
-    if (yPosition > 200) {
-      pdf.addPage();
-      drawHeader();
-      yPosition = 45;
-    }
-
-    // Fonctionnalités
-    yPosition = drawSectionTitle('Option Software', yPosition);
-
-    const featuresHeaders = ['Option Software', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
-    const featuresRows = [];
-
-    if (data.features.data && data.features.data.length > 0) {
-      data.features.data.forEach(feature => {
-        featuresRows.push([
-          feature.name,
-          feature.presented ? 'oui' : 'non',
-          feature.appreciated ? 'oui' : 'non',
-          feature.wanted ? 'oui' : 'non'
-        ]);
-      });
-    } else {
-      featuresRows.push(['Aucune option software sélectionnée', '', '', '']);
-    }
-
-    yPosition = drawTable(featuresHeaders, featuresRows, yPosition);
-    yPosition = addCommentBox(data.features.comments, yPosition);
-
-    // Ajouter la deuxième page pour les options matérielles et connexion
-    pdf.addPage();
-    drawHeader();
-    yPosition = 45;
-
-    // Options matérielles
-    yPosition = drawSectionTitle('Option Hardware', yPosition);
-
-    const hardwareHeaders = ['Option Hardware', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
-    const hardwareRows = [];
-
-    if (data.hardware.data && data.hardware.data.length > 0) {
-      data.hardware.data.forEach(hw => {
-        hardwareRows.push([
-          hw.name,
-          hw.presented ? 'oui' : 'non',
-          hw.appreciated ? 'oui' : 'non',
-          hw.wanted ? 'oui' : 'non'
-        ]);
-      });
-    } else {
-      hardwareRows.push(['Aucune option hardware sélectionnée', '', '', '']);
-    }
-
-    yPosition = drawTable(hardwareHeaders, hardwareRows, yPosition);
-    yPosition = addCommentBox(data.hardware.comments, yPosition);
-    yPosition += 10;
-
-    // Options de connexion
-    yPosition = drawSectionTitle('Connectivité et imprimante', yPosition);
-
-    const connexHeaders = ['Connectivité et imprimante', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
-    const connexRows = [];
-
-    if (data.connex.data && data.connex.data.length > 0) {
-      data.connex.data.forEach(conn => {
-        connexRows.push([
-          conn.name,
-          conn.presented ? 'oui' : 'non',
-          conn.appreciated ? 'oui' : 'non',
-          conn.wanted ? 'oui' : 'non'
-        ]);
-      });
-    } else {
-      connexRows.push(['Aucune option de connexion sélectionnée', '', '', '']);
-    }
-
-    yPosition = drawTable(connexHeaders, connexRows, yPosition);
-    yPosition = addCommentBox(data.connex.comments, yPosition);
-    yPosition += 15;
-
-    // Vérifier si on a besoin d'une nouvelle page pour les médecins
-    if (yPosition > 200) {
-      pdf.addPage();
-      drawHeader();
-      yPosition = 45;
-    }
-
-    // Section Médecins
-    yPosition = drawSectionTitle('Médecins et Responsables', yPosition);
-
-    pdf.setTextColor(50, 50, 50);
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'normal');
-    if (data.clientInfo.generalRemarks?.trim()) {
-      const remarquesText = normalizeTextForPdf(data.clientInfo.generalRemarks);
-      const remarquesLines = pdf.splitTextToSize(remarquesText, 170) as string[];
-
-      // Remarques générales en zone grise
-      yPosition += 5;
-      // Sous-titre violet "Remarques générales"
-      pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      pdf.rect(15, yPosition, 180, 10, 'F');
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Remarques générales', 20, yPosition + 7);
-      yPosition += 12;
-      // Zone grise (paginée si le texte est long)
-      yPosition = drawPaginatedGrayBox({
-        pdf,
-        drawHeader,
-        y: yPosition,
-        lines: remarquesLines,
-        firstChunkTopPadding: 8,
-        nextChunksTopPadding: 8,
-        minChunkHeight: 12,
-        chunkGap: 3,
-        blockGap: 0,
-      });
-
-      // Séparation blanche juste après la zone remarques générales
-      pdf.setFillColor(255, 255, 255);
-      pdf.rect(15, yPosition, 180, 8, 'F');
-      yPosition += 8;
-      pdf.setFillColor(255, 255, 255);
-      pdf.rect(15, yPosition, 180, 8, 'F');
-      yPosition += 8;
-    }
-
-    const hasMedecinsAvis = [
-      data.medecins.promoteur,
-      data.medecins.detracteur,
-      data.medecins.indecis,
-    ].some((value) => value?.trim());
-
-    if (hasMedecinsAvis) {
-      // Titre violet "Avis des médecins"
-      pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      pdf.rect(15, yPosition, 180, 10, 'F');
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Avis des médecins', 20, yPosition + 7);
-      yPosition += 12;
-
-      // Tableau horizontal "Avis des médecins"
-      const avisHeaders = ['Promoteur', 'Rétracteur', 'Indécis'];
-      const avisRow = [
-        normalizeTextForPdf(data.medecins.promoteur || 'Aucun'),
-        normalizeTextForPdf(data.medecins.detracteur || 'Aucun'),
-        normalizeTextForPdf(data.medecins.indecis || 'Aucun')
-      ];
-      // Largeur totale 180mm, 3 colonnes égales
-      const avisColWidths = [60, 60, 60];
-      // Calculer la hauteur max nécessaire
-      const avisLinesArr = avisRow.map((avis, i) => pdf.splitTextToSize(avis, avisColWidths[i] - 6));
-      const maxAvisHeight = Math.max(...avisLinesArr.map(lines => lines.length * 5 + 8));
-      yPosition = ensureVerticalSpace(pdf, drawHeader, yPosition, 8 + maxAvisHeight);
-      // En-tête violet
-      pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      pdf.rect(15, yPosition, 180, 8, 'F');
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'bold');
-      let xAvis = 15;
-      avisHeaders.forEach((header, i) => {
-        pdf.text(header, xAvis + 3, yPosition + 5);
-        xAvis += avisColWidths[i];
-      });
-      yPosition += 8;
-      // Ligne d'avis, hauteur max
-      pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(50, 50, 50);
-      let xAvisVal = 15;
-      avisLinesArr.forEach((avisLines, i) => {
-        pdf.setFillColor(i % 2 === 0 ? 245 : 235, 245, 245);
-        pdf.rect(xAvisVal, yPosition, avisColWidths[i], maxAvisHeight, 'F');
-        pdf.text(avisLines, xAvisVal + 3, yPosition + 6);
-        xAvisVal += avisColWidths[i];
-      });
-      yPosition += maxAvisHeight;
-
-      // yPosition += detracteurHeight + 5; // Removed undefined variable, already handled by maxAvisHeight above
-
-      // Indécis
-      const indecisText = normalizeTextForPdf(data.medecins.indecis || 'Aucun');
-      const indecisLines = pdf.splitTextToSize(indecisText, 170) as string[];
-      yPosition = drawPaginatedGrayBox({
-        pdf,
-        drawHeader,
-        y: yPosition,
-        lines: indecisLines,
-        title: 'Indécis',
-        firstChunkTopPadding: 12,
-        nextChunksTopPadding: 5,
-        minChunkHeight: 12,
-        chunkGap: 3,
-        blockGap: 12,
-      });
-    }
-
-    // Ajouter les footers à la fin pour garantir une pagination correcte
-    const totalPages = pdf.internal.getNumberOfPages();
-    for (let page = 1; page <= totalPages; page++) {
-      pdf.setPage(page);
-      drawFooter(page, totalPages);
-    }
-
-    // Générer le fichier PDF
-    const fileName = `Démo_${data.selectedDevice}_${data.clientInfo.name}_${new Date().toISOString().split('T')[0]}.pdf`;
-
-    const pdfBlob = pdf.output("blob");
-    pdf.save(fileName);
-
-    // Envoyer un seul email avec tous les destinataires
-    await sendEmail(
-      data.selectedCommercialEmails,
-      "Rapport de démonstration",
-      data.emailBody,
-      pdfBlob,
-      data.selectedIAEmails // IAs en CC
-    );
-
-    document.body.removeChild(loadingDiv);
-
-  } catch (error) {
-    console.error("Erreur lors de la génération du PDF:", error);
-    alert("Une erreur s'est produite lors de la génération du PDF.");
   }
 };
 

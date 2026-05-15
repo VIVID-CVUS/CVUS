@@ -7,6 +7,7 @@ import ClientInfo from './components/Client/ClientInfo';
 import EmailBodyEditor from './components/Client/EmailBodyEditor.tsx';
 import CommercialSelect from './components/Client/PeopleSelect';
 import ProductSelect from './components/Client/ProductSelect';
+import featuresDataRaw from './components/data/feature.json';
 import commerciaux from './components/data/commercials.json';
 import ia from './components/data/ia.json';
 import FormContainer from './components/Layout/FormContainer';
@@ -82,6 +83,42 @@ type EchoPage = {
   indecisNotes: string;
 };
 
+type EchoTemplate = Pick<
+  EchoPage,
+  | 'selectedDevice'
+  | 'selectedSondes'
+  | 'selectedFeatures'
+  | 'selectedHardware'
+  | 'selectedConnex'
+  | 'sondesComments'
+  | 'featuresComments'
+  | 'hardwareComments'
+  | 'connexComments'
+  | 'generalRemarks'
+  | 'promoteurNotes'
+  | 'detracteurNotes'
+  | 'indecisNotes'
+>;
+
+type SavedTemplate = {
+  id: string;
+  name: string;
+  createdAt: string;
+  template: EchoTemplate;
+};
+
+type RawDeviceItem = {
+  id: number;
+  name: string;
+  presented: boolean;
+  appreciated: boolean;
+  wanted: boolean;
+};
+
+type RawByDevice<TSection extends string> = Record<string, Record<TSection, RawDeviceItem[]>>;
+
+const TEMPLATE_STORAGE_KEY = 'cvus:saved-templates';
+
 const createEmptyEchoPage = (): EchoPage => ({
   clientName: '',
   clientEmail: '',
@@ -111,6 +148,8 @@ function Product(): JSX.Element {
   // États pour les commerciaux et IAs
   const [selectedCommercialEmails, setSelectedCommercialEmails] = useState<string[]>([]);
   const [selectedIAEmails, setSelectedIAEmails] = useState<string[]>([]);
+  const [isSavedTemplatesOpen, setIsSavedTemplatesOpen] = useState<boolean>(false);
+  const [savedTemplates, setSavedTemplates] = useState<SavedTemplate[]>([]);
 
   // État pour le corps du mail
   const [emailBody, setEmailBody] = useState<string>(() =>
@@ -119,6 +158,113 @@ function Product(): JSX.Element {
 
   const activeEcho = echoPages[activeEchoIndex] ?? createEmptyEchoPage();
 
+  const readSavedTemplates = (): SavedTemplate[] => {
+    const storedRaw = localStorage.getItem(TEMPLATE_STORAGE_KEY);
+    if (!storedRaw) return [];
+
+    try {
+      const parsed = JSON.parse(storedRaw) as SavedTemplate[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const persistSavedTemplates = (templates: SavedTemplate[]): void => {
+    localStorage.setItem(TEMPLATE_STORAGE_KEY, JSON.stringify(templates));
+    setSavedTemplates(templates);
+  };
+
+  useEffect(() => {
+    setSavedTemplates(readSavedTemplates());
+  }, []);
+
+  const saveCurrentAsTemplate = (): void => {
+    if (!activeEcho.selectedDevice) {
+      alert('Veuillez sélectionner un échographe avant d\'enregistrer un modèle.');
+      return;
+    }
+
+    const defaultName = `${activeEcho.selectedDevice} - ${new Date().toLocaleDateString('fr-FR')}`;
+    const inputName = window.prompt('Nom de l\'enregistrement :', defaultName);
+    if (inputName === null) return;
+
+    const trimmedName = inputName.trim();
+    if (!trimmedName) {
+      alert('Le nom de l\'enregistrement est obligatoire.');
+      return;
+    }
+
+    const template: EchoTemplate = {
+      selectedDevice: activeEcho.selectedDevice,
+      selectedSondes: activeEcho.selectedSondes,
+      selectedFeatures: activeEcho.selectedFeatures,
+      selectedHardware: activeEcho.selectedHardware,
+      selectedConnex: activeEcho.selectedConnex,
+      sondesComments: activeEcho.sondesComments,
+      featuresComments: activeEcho.featuresComments,
+      hardwareComments: activeEcho.hardwareComments,
+      connexComments: activeEcho.connexComments,
+      generalRemarks: activeEcho.generalRemarks,
+      promoteurNotes: activeEcho.promoteurNotes,
+      detracteurNotes: activeEcho.detracteurNotes,
+      indecisNotes: activeEcho.indecisNotes,
+    };
+
+    try {
+      const nextTemplates = [
+        {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          name: trimmedName,
+          createdAt: new Date().toISOString(),
+          template,
+        },
+        ...readSavedTemplates(),
+      ];
+      persistSavedTemplates(nextTemplates);
+      alert(`Enregistrement "${trimmedName}" ajouté.`);
+    } catch {
+      alert('Impossible d\'enregistrer le modèle pour le moment.');
+    }
+  };
+
+  const applySavedTemplate = (savedTemplateId: string): void => {
+    const selected = savedTemplates.find((item) => item.id === savedTemplateId);
+    if (!selected) return;
+
+    const { template } = selected;
+    updateActiveEcho((prev) => ({
+      ...prev,
+      selectedDevice: template.selectedDevice,
+      selectedSondes: template.selectedSondes,
+      selectedFeatures: template.selectedFeatures,
+      selectedHardware: template.selectedHardware,
+      selectedConnex: template.selectedConnex,
+      sondesComments: template.sondesComments,
+      featuresComments: template.featuresComments,
+      hardwareComments: template.hardwareComments,
+      connexComments: template.connexComments,
+      generalRemarks: template.generalRemarks,
+      promoteurNotes: template.promoteurNotes,
+      detracteurNotes: template.detracteurNotes,
+      indecisNotes: template.indecisNotes,
+    }));
+
+    setIsSavedTemplatesOpen(false);
+    alert(`Enregistrement "${selected.name}" appliqué.`);
+  };
+
+  const deleteSavedTemplate = (savedTemplateId: string): void => {
+    const selected = savedTemplates.find((item) => item.id === savedTemplateId);
+    if (!selected) return;
+
+    const confirmed = window.confirm(`Supprimer l\'enregistrement "${selected.name}" ?`);
+    if (!confirmed) return;
+
+    const nextTemplates = savedTemplates.filter((item) => item.id !== savedTemplateId);
+    persistSavedTemplates(nextTemplates);
+  };
+
   useEffect(() => {
     setEmailBody(`Bonjour,\n\nVeuillez trouver ci-joint le rapport de démonstration pour ${activeEcho.clientName}.`);
   }, [activeEcho.clientName]);
@@ -126,6 +272,32 @@ function Product(): JSX.Element {
   const updateActiveEcho = (updater: (prev: EchoPage) => EchoPage): void => {
     setEchoPages((prev) => prev.map((page, idx) => (idx === activeEchoIndex ? updater(page) : page)));
   };
+
+  const getCatalogFeaturesForDevice = (device: string): Feature[] => {
+    if (!device) return [];
+    const rawFeatures = ((featuresDataRaw as unknown) as RawByDevice<'features'>)[device]?.features || [];
+
+    return rawFeatures.map((item) => ({
+      id: String(item.id),
+      name: item.name,
+      presented: item.presented,
+      appreciated: item.appreciated,
+      wanted: item.wanted,
+    }));
+  };
+
+  useEffect(() => {
+    if (!activeEcho.selectedDevice) return;
+    if (activeEcho.selectedFeatures.length > 0) return;
+
+    const fallbackFeatures = getCatalogFeaturesForDevice(activeEcho.selectedDevice);
+    if (!fallbackFeatures.length) return;
+
+    updateActiveEcho((prev) => ({
+      ...prev,
+      selectedFeatures: fallbackFeatures,
+    }));
+  }, [activeEcho.selectedDevice, activeEcho.selectedFeatures.length]);
 
   const addEchographePage = (): void => {
     const newIndex = echoPages.length;
@@ -262,10 +434,10 @@ function Product(): JSX.Element {
   const updateDataStates = (deviceData: DeviceData): void => {
     updateActiveEcho((prev) => ({
       ...prev,
-      selectedSondes: deviceData.sondes || [],
-      selectedFeatures: deviceData.features || [],
-      selectedHardware: deviceData.hardware || [],
-      selectedConnex: deviceData.connex || [],
+      selectedSondes: deviceData.sondes ?? [],
+      selectedFeatures: deviceData.features ?? [],
+      selectedHardware: deviceData.hardware ?? [],
+      selectedConnex: deviceData.connex ?? [],
       sondesComments: '',
       featuresComments: '',
       hardwareComments: '',
@@ -276,21 +448,31 @@ function Product(): JSX.Element {
   return (
     <FormContainer formRef={formRef}>
       <div className="mb-4 bg-white rounded-lg shadow p-4">
-        <div className="flex flex-wrap gap-2 items-center">
-          {echoPages.map((_, index) => (
-            <button
-              key={`echo-page-${index}`}
-              type="button"
-              className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                activeEchoIndex === index
-                  ? 'bg-purple-800 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-              onClick={() => setActiveEchoIndex(index)}
-            >
-              {`Échographe ${index + 1}`}
-            </button>
-          ))}
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-wrap gap-2 items-center">
+            {echoPages.map((_, index) => (
+              <button
+                key={`echo-page-${index}`}
+                type="button"
+                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                  activeEchoIndex === index
+                    ? 'bg-purple-800 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                onClick={() => setActiveEchoIndex(index)}
+              >
+                {`Échographe ${index + 1}`}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsSavedTemplatesOpen(true)}
+            className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-md w-full md:w-auto"
+          >
+            Mes enregistrements
+          </button>
         </div>
       </div>
 
@@ -404,9 +586,65 @@ function Product(): JSX.Element {
               <ActionButtons
                 selectedCommercial={!!selectedCommercialEmails.length}
                 addEchographe={addEchographePage}
+                saveTemplate={saveCurrentAsTemplate}
+                hasSelectedDevice={!!activeEcho.selectedDevice}
                 downloadPdf={sendExcelToCommercial}
                 sendPdfToCommercial={sendPdfToCommercial}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isSavedTemplatesOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">Mes enregistrements</h3>
+              <button
+                type="button"
+                onClick={() => setIsSavedTemplatesOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                Fermer
+              </button>
+            </div>
+
+            <div className="p-4 space-y-3 overflow-y-auto max-h-[60vh]">
+              {savedTemplates.length === 0 && (
+                <p className="text-gray-600">Aucun enregistrement pour le moment.</p>
+              )}
+
+              {savedTemplates.map((item) => (
+                <div key={item.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <p className="font-semibold text-gray-800">{item.name}</p>
+                      <p className="text-sm text-gray-600">Produit: {item.template.selectedDevice || 'Non défini'}</p>
+                      <p className="text-xs text-gray-500">
+                        Créé le {new Date(item.createdAt).toLocaleString('fr-FR')}
+                      </p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => applySavedTemplate(item.id)}
+                        className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Charger
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteSavedTemplate(item.id)}
+                        className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
