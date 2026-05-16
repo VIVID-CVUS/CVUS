@@ -2,6 +2,7 @@
 import React from 'react';
 
 type Props = {
+  mode?: 'demo' | 'parc';
   clientName: string;
   clientEmail: string;
   demoDate: string;
@@ -15,6 +16,7 @@ type Props = {
 };
 
 const ClientInfo: React.FC<Props> = ({
+  mode = 'demo',
   clientName,
   clientEmail,
   demoDate,
@@ -26,13 +28,17 @@ const ClientInfo: React.FC<Props> = ({
   setLieuService,
   setGeneralRemarks
 }) => {
+  const isParc = mode === 'parc';
+
   return (
     <div className="mb-6 bg-white rounded-lg shadow p-4">
-      <h2 className="text-xl font-bold mb-3 text-purple-800">Informations Client</h2>
+      <h2 className="text-xl font-bold mb-3 text-purple-800">
+        {isParc ? 'Informations Service' : 'Informations Client'}
+      </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="clientName">
-            Nom du client
+            {isParc ? 'Contact client' : 'Nom du client'}
           </label>
           <input
             id="clientName"
@@ -42,19 +48,22 @@ const ClientInfo: React.FC<Props> = ({
             onChange={(e) => setClientName(e.target.value)}
           />
         </div>
-        <div>
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="clientEmail">
-            Adresse Mail de contact
-          </label>
-          <input
-            id="clientEmail"
-            type="email"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-600"
-            value={clientEmail}
-            onChange={(e) => setClientEmail(e.target.value)}
-          />
-        </div>
-        <div>
+        {!isParc && (
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="clientEmail">
+              Adresse Mail de contact
+            </label>
+            <input
+              id="clientEmail"
+              type="text"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-600"
+              value={clientEmail}
+              onChange={(e) => setClientEmail(e.target.value)}
+            />
+          </div>
+        )}
+        {!isParc && (
+          <div>
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="demoDate">
             Date de démonstration
           </label>
@@ -65,10 +74,11 @@ const ClientInfo: React.FC<Props> = ({
             value={demoDate}
             onChange={(e) => setDemoDate(e.target.value)}
           />
-        </div>
+          </div>
+        )}
         <div>
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="lieuService">
-            Lieu/Service
+            {isParc ? 'Service' : 'Lieu/Service'}
           </label>
           <input
             id="lieuService"
