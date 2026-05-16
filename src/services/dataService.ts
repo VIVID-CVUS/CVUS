@@ -1,6 +1,6 @@
 import { jsPDF } from 'jspdf';
 import { saveAs } from 'file-saver';
-import { PDFDocument } from 'pdf-lib';
+import { PDFArray, PDFDocument, PDFName, StandardFonts, rgb } from 'pdf-lib';
 import logoPng from '../assets/GE_HealthCare_logo_2023.png'
 // import autoTable from 'jspdf-autotable';
 // import emailjs from 'emailjs-com';
@@ -49,6 +49,94 @@ const normalizeTextForPdf = (value: string): string => {
     .replace(/[\u201C\u201D\u2033]/g, '"')
     .replace(/[\u2010\u2011\u2012\u2013\u2014\u2212]/g, '-')
     .replace(/\u2026/g, '...');
+};
+
+const normalizeTextForPdfLib = (value: string): string => {
+  let text = normalizeTextForPdf(value)
+    .replace(/\r\n/g, ' ')
+    .replace(/\n/g, ' ');
+
+  // Transliterate accented characters to safe WinAnsi equivalents using regex
+  text = text.replace(/[àáâãäå]/g, 'a');
+  text = text.replace(/[èéêë]/g, 'e');
+  text = text.replace(/[ìíîï]/g, 'i');
+  text = text.replace(/[òóôõö]/g, 'o');
+  text = text.replace(/[ùúûü]/g, 'u');
+  text = text.replace(/[ýÿ]/g, 'y');
+  text = text.replace(/ç/g, 'c');
+  text = text.replace(/ñ/g, 'n');
+  text = text.replace(/æ/g, 'ae');
+  text = text.replace(/œ/g, 'oe');
+
+  // Drop any remaining unsupported code points
+  return text.replace(/[^\x20-\x7E\xA0-\xFF]/g, '');
+};
+
+type SondeCategory =
+  | 'Sectorielle'
+  | 'ETO'
+  | 'Convexe'
+  | 'Linéaire'
+  | 'Portable'
+  | 'Crayon'
+  | 'Endocavitaire'
+  | 'Non classée';
+
+const ETO_SONDES = new Set(['6TC-RS', '9T-RS', '10T-D', '6VT-D', '9T', '9VT-D', '9VT']);
+const CRAYON_SONDES = new Set(['P2D', 'P6D']);
+const SECTORIELLE_FORCE = new Set(['4VC-D', '6VC-D']);
+const SONDE_CATEGORY_ORDER: SondeCategory[] = [
+  'Sectorielle',
+  'ETO',
+  'Convexe',
+  'Linéaire',
+  'Portable',
+  'Crayon',
+  'Endocavitaire',
+  'Non classée',
+];
+
+const categorizeSondeForPdf = (name: string): SondeCategory => {
+  const normalized = name.toUpperCase().replace(/\s+/g, ' ').trim();
+  const base = normalized.replace(/\(.*?\)/g, '').trim();
+
+  if (base.includes('VSCAN')) return 'Portable';
+  if (CRAYON_SONDES.has(base)) return 'Crayon';
+  if (ETO_SONDES.has(base)) return 'ETO';
+
+  if (
+    base.startsWith('IC')
+    || base.includes('IC5')
+    || base.includes('IC- CORD')
+    || base.includes('ICE CORD')
+  ) {
+    return 'Endocavitaire';
+  }
+
+  if (
+    SECTORIELLE_FORCE.has(base)
+    || base.includes('4VC')
+    || base.includes('6VC')
+    || base.includes('SC')
+    || /(^|[^A-Z])S\d/.test(base)
+    || /\dS-/.test(base)
+    || base.includes('S-RS')
+  ) {
+    return 'Sectorielle';
+  }
+
+  if (
+    base.startsWith('C')
+    || /(^|[^A-Z])C\d/.test(base)
+    || base.includes('C-RS')
+    || /-C($|-)/.test(base)
+  ) {
+    return 'Convexe';
+  }
+
+  if (base.includes('L')) return 'Linéaire';
+
+  return 'Non classée';
 };
 
 // Type de données pour la présentation des éléments
@@ -104,6 +192,22 @@ type PreparedData = {
   };
 };
 
+export type ReportMode = 'demo' | 'parc' | 'comparateur';
+
+export type ParcCoverInfo = {
+  hospitalName: string;
+  demoDate: string;
+  address: string;
+};
+
+type ExportPdfOptions = {
+  skipSave?: boolean;
+  returnBlob?: boolean;
+  includeClientInfo?: boolean;
+  clientInfoBannerOnly?: boolean;
+  reportMode?: ReportMode;
+};
+
 // Define jsPDF internal type extension
 interface PDFInternal {
   getNumberOfPages: () => number;
@@ -124,7 +228,7 @@ type ExtendedJsPDF = jsPDF & {
   internal: PDFInternal;
 };
 
-const CONTENT_TOP_Y = 45;
+const CONTENT_TOP_Y = 50;
 const CONTENT_BOTTOM_Y = 285;
 
 type DrawHeaderFn = () => void;
@@ -355,7 +459,7 @@ export const prepareData = ({
 // Fonction pour exporter les données au format Excel
 export const exportToExcel = (
   data: PreparedData,
-  options: { skipSave?: boolean; returnBlob?: boolean; includeClientInfo?: boolean; clientInfoBannerOnly?: boolean } = {}
+  options: ExportPdfOptions = {}
 ): Blob | void => {
 
 
@@ -363,6 +467,8 @@ export const exportToExcel = (
   
   // Use type assertion to handle the incompatible types
   const pdf = new jsPDF('p', 'mm', 'a4') as unknown as ExtendedJsPDF;
+
+  const reportMode: ReportMode = options.reportMode ?? 'demo';
 
   // Fonctionnalités pour créer un PDF
   const drawHeader = () => {
@@ -375,27 +481,39 @@ export const exportToExcel = (
     const logoHeight = 10;  // hauteur en mm, ajustez selon votre image
     pdf.addImage(logoPng, 'PNG', 5, 5, logoWidth, logoHeight);
 
-    // 3️⃣ Titre de la démo, centré verticalement dans le bandeau
+    // 3️⃣ Titre/Service centré dans le bandeau
     pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(18);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(`Démonstration ${data.selectedDevice}`, 105, 16, { align: 'center' });
+    
+    if (reportMode === 'parc') {
+      // Mode Parc: afficher Service et Appareil centrés, sans étiquettes
+      pdf.setFontSize(23);
+      const serviceName = data.clientInfo.lieuService || 'Service non renseigné';
+      pdf.text(serviceName, 105, 14, { align: 'center' });
 
-    // 4️⃣ Info client et date (sous le bandeau)
-    pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'normal');
-    let headerTextY = 24;
-    if (data.clientInfo.name?.trim()) {
-      pdf.text(`Client: ${data.clientInfo.name}`, 105, headerTextY, { align: 'center' });
-      headerTextY += 7;
-    }
-    if (data.clientInfo.demoDate?.trim()) {
-      pdf.text(
-        `Date: ${formatDateJJMMAAAA(data.clientInfo.demoDate)}`,
-        105,
-        headerTextY,
-        { align: 'center' }
-      );
+      pdf.setFontSize(20);
+      pdf.text(data.selectedDevice, 105, 25, { align: 'center' });
+    } else {
+      // Mode Démo: afficher le titre original avec Client et Date
+      pdf.setFontSize(18);
+      const headerTitle = `Démonstration ${data.selectedDevice}`;
+      pdf.text(headerTitle, 105, 16, { align: 'center' });
+      // 4️⃣ Info client et date (sous le bandeau)
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      let headerTextY = 24;
+      if (data.clientInfo.name?.trim()) {
+        pdf.text(`Client: ${data.clientInfo.name}`, 105, headerTextY, { align: 'center' });
+        headerTextY += 7;
+      }
+      if (data.clientInfo.demoDate?.trim()) {
+        pdf.text(
+          `Date: ${formatDateJJMMAAAA(data.clientInfo.demoDate)}`,
+          105,
+          headerTextY,
+          { align: 'center' }
+        );
+      }
     }
   };
 
@@ -405,7 +523,8 @@ export const exportToExcel = (
     pdf.rect(0, 287, 210, 10, 'F');
     pdf.setTextColor(100, 100, 100);
     pdf.setFontSize(8);
-    pdf.text(`GE Healthcare - Rapport de démonstration - Page ${pageNumber}/${totalPages}`, 105, 293, { align: 'center' });
+    const footerTitle = reportMode === 'parc' ? 'Rapport de gestion de parc' : 'Rapport de démonstration';
+    pdf.text(`GE Healthcare - ${footerTitle} - Page ${pageNumber}/${totalPages}`, 105, 293, { align: 'center' });
   };
 
   const drawSectionTitle = (title: string, yPos: number) => {
@@ -544,7 +663,7 @@ export const exportToExcel = (
   drawHeader();
 
   // Infos client
-  let yPosition = 45;
+  let yPosition = CONTENT_TOP_Y;
   const hasClientInfoRows = Boolean(
     data.clientInfo.name?.trim()
     || data.clientInfo.email?.trim()
@@ -554,56 +673,76 @@ export const exportToExcel = (
   const hasClientRemarks = Boolean(data.clientInfo.generalRemarks?.trim());
   const includeClientInfo = options.includeClientInfo !== false && (hasClientInfoRows || hasClientRemarks);
   if (includeClientInfo) {
-    yPosition = drawSectionTitle('Informations Client', yPosition);
+    yPosition = drawSectionTitle(reportMode === 'parc' ? 'Informations Service' : 'Informations Client', yPosition);
 
     pdf.setTextColor(50, 50, 50);
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
 
     const clientInfoTable: string[][] = [];
-    if (data.clientInfo.name?.trim()) {
-      clientInfoTable.push(['Nom du client', data.clientInfo.name]);
-    }
-    if (data.clientInfo.email?.trim()) {
-      clientInfoTable.push(['Email', data.clientInfo.email]);
-    }
-    if (data.clientInfo.demoDate?.trim()) {
-      clientInfoTable.push(['Date de démonstration', formatDateJJMMAAAA(data.clientInfo.demoDate)]);
-    }
-    if (data.clientInfo.lieuService?.trim()) {
-      clientInfoTable.push(['Lieu/Service', data.clientInfo.lieuService]);
+    if (reportMode === 'parc') {
+      if (data.clientInfo.lieuService?.trim()) {
+        clientInfoTable.push(['Service', data.clientInfo.lieuService]);
+      }
+      if (data.clientInfo.name?.trim()) {
+        clientInfoTable.push(['Contact client', data.clientInfo.name]);
+      }
+    } else {
+      if (data.clientInfo.name?.trim()) {
+        clientInfoTable.push(['Nom du client', data.clientInfo.name]);
+      }
+      if (data.clientInfo.email?.trim()) {
+        clientInfoTable.push(['Email', data.clientInfo.email]);
+      }
+      if (data.clientInfo.demoDate?.trim()) {
+        clientInfoTable.push(['Date de démonstration', formatDateJJMMAAAA(data.clientInfo.demoDate)]);
+      }
+      if (data.clientInfo.lieuService?.trim()) {
+        clientInfoTable.push(['Lieu/Service', data.clientInfo.lieuService]);
+      }
     }
 
     if (clientInfoTable.length > 0) {
       const infoHeaders = ['Information', 'Détail'];
       const infoColWidths = [90, 90];
+      const infoHeaderHeight = 8;
+      const infoCellPaddingX = 3;
+      const infoCellPaddingY = 3;
+      const infoLineHeight = 4;
+      const infoMinRowHeight = 8;
       pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      pdf.rect(15, yPosition, 180, 8, 'F');
+      pdf.rect(15, yPosition, 180, infoHeaderHeight, 'F');
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
       let xInfo = 15;
       infoHeaders.forEach((header, i) => {
-        pdf.text(header, xInfo + 3, yPosition + 5);
+        pdf.text(header, i === 0 ? 18 : 105, yPosition + 5);
         xInfo += infoColWidths[i];
       });
-      yPosition += 8;
+      yPosition += infoHeaderHeight;
 
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(50, 50, 50);
       clientInfoTable.forEach((row, idx) => {
         const safeLabel = normalizeTextForPdf(row[0]);
         const safeValue = normalizeTextForPdf(row[1]);
+        const labelLines = pdf.splitTextToSize(safeLabel, infoColWidths[0] - (infoCellPaddingX * 2)) as string[];
+        const valueLines = pdf.splitTextToSize(safeValue, infoColWidths[1] - (infoCellPaddingX * 2)) as string[];
+        const maxLines = Math.max(labelLines.length, valueLines.length);
+        const infoRowHeight = Math.max(infoMinRowHeight, (maxLines * infoLineHeight) + (infoCellPaddingY * 2));
+
+        yPosition = ensureVerticalSpace(pdf, drawHeader, yPosition, infoRowHeight);
         pdf.setFillColor(idx % 2 === 0 ? 245 : 245, 245, 245);
-        pdf.rect(15, yPosition, 180, 8, 'F');
-        pdf.text(safeLabel, 18, yPosition + 5);
-        pdf.text(safeValue, 105, yPosition + 5);
-        yPosition += 8;
+        pdf.rect(15, yPosition, 180, infoRowHeight, 'F');
+        pdf.text(labelLines, 18, yPosition + infoCellPaddingY + infoLineHeight - 1);
+        pdf.text(valueLines, 105, yPosition + infoCellPaddingY + infoLineHeight - 1);
+        yPosition += infoRowHeight;
       });
 
       pdf.setFillColor(255, 255, 255);
       pdf.rect(15, yPosition, 180, 8, 'F');
-      yPosition += 8;
+      yPosition += 5;
     }
   }
 
@@ -664,7 +803,7 @@ export const exportToExcel = (
       xAvisVal += avisColWidths[i];
     });
     yPosition += maxAvisHeight;
-    yPosition += 8;
+    yPosition += 5;
   }
 
   if (includeClientInfo && data.clientInfo.generalRemarks?.trim()) {
@@ -688,19 +827,27 @@ export const exportToExcel = (
     });
     pdf.setFillColor(255, 255, 255);
     pdf.rect(15, yPosition, 180, 7, 'F');
-    yPosition += 7;
+    yPosition += 10;
   }
 
   // Sondes
   // drawSectionTitle dessine le bandeau à yPos - 6, on compense pour conserver 5mm blancs visibles.
-  yPosition += 6;
-  yPosition = drawSectionTitle('Sondes', yPosition);
+  yPosition += 5;
+  yPosition = drawSectionTitle('Sonde', yPosition);
 
   const sondesHeaders = ['Sonde', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
-  const sondesRows = [];
+  const sondesRows: string[][] = [];
 
   if (data.sondes.data && data.sondes.data.length > 0) {
-    data.sondes.data.forEach(sonde => {
+    const sortedSondes = [...data.sondes.data].sort((a, b) => {
+      const categoryA = categorizeSondeForPdf(a.name);
+      const categoryB = categorizeSondeForPdf(b.name);
+      const categoryIndex = SONDE_CATEGORY_ORDER.indexOf(categoryA) - SONDE_CATEGORY_ORDER.indexOf(categoryB);
+      if (categoryIndex !== 0) return categoryIndex;
+      return a.name.localeCompare(b.name, 'fr');
+    });
+
+    sortedSondes.forEach(sonde => {
       sondesRows.push([
         sonde.name,
         sonde.presented ? 'oui' : 'non',
@@ -714,10 +861,10 @@ export const exportToExcel = (
 
   yPosition = drawTable(sondesHeaders, sondesRows, yPosition);
   yPosition = addCommentBox(data.sondes.comments, yPosition);
-  yPosition += 2;
+  yPosition += 5;
 
   // Fonctionnalités
-  yPosition += 3;
+  yPosition += 5;
   yPosition = drawSectionTitle('Option Software', yPosition);
 
   const featuresHeaders = ['Option Software', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
@@ -738,10 +885,10 @@ export const exportToExcel = (
 
   yPosition = drawTable(featuresHeaders, featuresRows, yPosition);
   yPosition = addCommentBox(data.features.comments, yPosition);
-  yPosition += 2;
+  yPosition += 5;
 
   // Options matérielles
-  yPosition += 3;
+  yPosition += 5;
   yPosition = drawSectionTitle('Option Hardware', yPosition);
 
   const hardwareHeaders = ['Option Hardware', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
@@ -762,10 +909,10 @@ export const exportToExcel = (
 
   yPosition = drawTable(hardwareHeaders, hardwareRows, yPosition);
   yPosition = addCommentBox(data.hardware.comments, yPosition);
-  yPosition += 2;
+  yPosition += 5;
 
   // Options de connexion
-  yPosition += 3;
+  yPosition += 5;
   yPosition = drawSectionTitle('Connectivité et imprimante', yPosition);
 
   const connexHeaders = ['Connectivité et imprimante', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
@@ -786,7 +933,7 @@ export const exportToExcel = (
 
   yPosition = drawTable(connexHeaders, connexRows, yPosition);
   yPosition = addCommentBox(data.connex.comments, yPosition);
-  yPosition += 15;
+  yPosition += 5;
 
   // Section Médecins
     // ...le tableau médecins est déjà affiché plus haut, on retire la redéclaration...
@@ -814,7 +961,8 @@ export const exportToExcel = (
   }
 
   // Générer le fichier PDF
-  const fileName = `Démo_${data.selectedDevice}_${data.clientInfo.name}_${new Date().toISOString().split('T')[0]}.pdf`;
+  const filePrefix = reportMode === 'parc' ? 'GestionParc' : 'Démo';
+  const fileName = `${filePrefix}_${data.selectedDevice}_${data.clientInfo.name}_${new Date().toISOString().split('T')[0]}.pdf`;
 
   const pdfBlob = pdf.output('blob');
   if (!options.skipSave) {
@@ -836,6 +984,8 @@ const mergePdfBlobs = async (blobs: Blob[]): Promise<Blob> => {
     pages.forEach((page) => mergedPdf.addPage(page));
   }
 
+  await redrawMergedFooters(mergedPdf, 'demo');
+
   const mergedBytes = await mergedPdf.save();
   const mergedArrayBuffer = mergedBytes.buffer.slice(
     mergedBytes.byteOffset,
@@ -844,14 +994,363 @@ const mergePdfBlobs = async (blobs: Blob[]): Promise<Blob> => {
   return new Blob([mergedArrayBuffer], { type: 'application/pdf' });
 };
 
-const buildMergedFileName = (dataList: PreparedData[]): string => {
-  const first = dataList[0];
-  const datePart = new Date().toISOString().split('T')[0];
-  if (dataList.length === 1) {
-    return `Démo_${first.selectedDevice}_${first.clientInfo.name}_${datePart}.pdf`;
+const redrawMergedFooters = async (
+  pdfDoc: PDFDocument,
+  reportMode: ReportMode,
+  startPageIndex = 0
+): Promise<void> => {
+  const pages = pdfDoc.getPages().slice(startPageIndex);
+
+  if (!pages.length) {
+    return;
   }
 
-  return `Démo_multi_${first.clientInfo.name}_${datePart}.pdf`;
+  const footerFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const footerTitle = reportMode === 'parc' ? 'Rapport de gestion de parc' : 'Rapport de démonstration';
+  const footerHeight = 28.35;
+  const footerTextY = 11.34;
+
+  pages.forEach((page, index) => {
+    const { width } = page.getSize();
+    const pageNumber = index + 1;
+    const text = `GE Healthcare - ${footerTitle} - Page ${pageNumber}/${pages.length}`;
+    const textWidth = footerFont.widthOfTextAtSize(text, 8);
+
+    page.drawRectangle({
+      x: 0,
+      y: 0,
+      width,
+      height: footerHeight,
+      color: rgb(240 / 255, 240 / 255, 240 / 255),
+    });
+
+    page.drawText(text, {
+      x: (width - textWidth) / 2,
+      y: footerTextY,
+      size: 8,
+      font: footerFont,
+      color: rgb(100 / 255, 100 / 255, 100 / 255),
+    });
+  });
+};
+
+const buildMergedFileName = (
+  dataList: PreparedData[],
+  reportMode: ReportMode = 'demo',
+  parcCoverInfo?: ParcCoverInfo
+): string => {
+  const first = dataList[0];
+  const datePart = new Date().toISOString().split('T')[0];
+
+  if (reportMode === 'parc') {
+    const hospitalName = (parcCoverInfo?.hospitalName?.trim() || first.clientInfo.name?.trim() || 'Hopital');
+    return `Gestion_de_Parc_${hospitalName}_${datePart}.pdf`;
+  }
+
+  const prefix = 'Démo';
+  const entity = first.clientInfo.name || 'Client';
+
+  if (dataList.length === 1) {
+    return `${prefix}_${first.selectedDevice}_${entity}_${datePart}.pdf`;
+  }
+
+  return `${prefix}_multi_${entity}_${datePart}.pdf`;
+};
+
+const addInternalLink = (
+  pdfDoc: PDFDocument,
+  sourcePageIndex: number,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  targetPageIndex: number
+): void => {
+  const pages = pdfDoc.getPages();
+  if (
+    sourcePageIndex < 0
+    || sourcePageIndex >= pages.length
+    || targetPageIndex < 0
+    || targetPageIndex >= pages.length
+  ) {
+    return;
+  }
+
+  const sourcePage = pages[sourcePageIndex] as unknown as { node: { lookupMaybe?: (name: unknown, type: unknown) => PDFArray | undefined; lookup?: (name: unknown, type: unknown) => PDFArray | undefined; set?: (name: unknown, value: unknown) => void; }; ref: unknown; };
+  const targetPage = pages[targetPageIndex] as unknown as { ref: unknown };
+
+  const linkAnnot = (pdfDoc.context as any).obj({
+    Type: PDFName.of('Annot'),
+    Subtype: PDFName.of('Link'),
+    Rect: [x, y, x + width, y + height],
+    Border: [0, 0, 0],
+    Dest: [targetPage.ref, PDFName.of('Fit')],
+  });
+
+  const linkRef = pdfDoc.context.register(linkAnnot);
+  const sourceNode = sourcePage.node;
+  if (!sourceNode || typeof sourceNode.set !== 'function') {
+    return;
+  }
+
+  let annots: PDFArray | undefined;
+  if (typeof sourceNode.lookupMaybe === 'function') {
+    annots = sourceNode.lookupMaybe(PDFName.of('Annots'), PDFArray);
+  } else if (typeof sourceNode.lookup === 'function') {
+    try {
+      annots = sourceNode.lookup(PDFName.of('Annots'), PDFArray);
+    } catch {
+      annots = undefined;
+    }
+  }
+
+  if (annots && typeof annots.push === 'function') {
+    annots.push(linkRef);
+  } else {
+    sourceNode.set(PDFName.of('Annots'), pdfDoc.context.obj([linkRef]));
+  }
+};
+
+const splitTextLines = (text: string, font: any, fontSize: number, maxWidth: number): string[] => {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let currentLine = '';
+
+  for (const word of words) {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    const lineWidth = font.widthOfTextAtSize(testLine, fontSize);
+
+    if (lineWidth <= maxWidth) {
+      currentLine = testLine;
+    } else {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  return lines;
+};
+
+const buildParcMergedBlob = async (
+  blobs: Blob[],
+  dataList: PreparedData[],
+  parcCoverInfo?: ParcCoverInfo
+): Promise<Blob> => {
+  const mergedPdf = await PDFDocument.create();
+  const sectionStartPages: number[] = [];
+
+  for (const blob of blobs) {
+    const bytes = await blob.arrayBuffer();
+    const sourcePdf = await PDFDocument.load(bytes);
+    sectionStartPages.push(mergedPdf.getPageCount());
+    const copied = await mergedPdf.copyPages(sourcePdf, sourcePdf.getPageIndices());
+    copied.forEach((page) => mergedPdf.addPage(page));
+  }
+
+  const totalBeforeCover = mergedPdf.getPageCount();
+  const coverPage = mergedPdf.insertPage(0, [595.28, 841.89]);
+  const fontRegular = await mergedPdf.embedFont(StandardFonts.Helvetica);
+  const fontBold = await mergedPdf.embedFont(StandardFonts.HelveticaBold);
+
+  // Load GE Logo
+  const logoResponse = await fetch(logoPng);
+  const logoBlob = await logoResponse.blob();
+  const logoArrayBuffer = await logoBlob.arrayBuffer();
+  const logoImage = await mergedPdf.embedPng(logoArrayBuffer);
+  const logoDims = logoImage.scale(0.14); // Scale to 14% of original
+
+  const pageWidth = 595.28;
+  const pageHeight = 841.89;
+  const centerX = pageWidth / 2;
+  const violetMain = rgb(96 / 255, 34 / 255, 166 / 255);
+  const ink = rgb(32 / 255, 33 / 255, 40 / 255);
+  const centeredX = (textWidth: number): number => Math.round(centerX - (textWidth / 2));
+
+  // Fond et structure institutionnelle
+  coverPage.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: rgb(252 / 255, 251 / 255, 254 / 255) });
+  coverPage.drawRectangle({ x: 0, y: 704, width: pageWidth, height: 138, color: violetMain });
+  coverPage.drawRectangle({ x: 0, y: 694, width: pageWidth, height: 6, color: violetMain });
+  coverPage.drawRectangle({ x: 40, y: 530, width: pageWidth - 80, height: 2, color: violetMain });
+
+  const heroTitle = normalizeTextForPdfLib('GESTION DE PARC');
+  const heroTitleSize = 32;
+  const heroTitleWidth = fontBold.widthOfTextAtSize(heroTitle, heroTitleSize);
+  coverPage.drawText(heroTitle, {
+    x: centeredX(heroTitleWidth),
+    y: 786,
+    size: heroTitleSize,
+    font: fontBold,
+    color: rgb(1, 1, 1),
+  });
+
+  // Place GE Logo under the title
+  coverPage.drawImage(logoImage, {
+    x: centerX - (logoDims.width / 2),
+    y: 721,
+    width: logoDims.width,
+    height: logoDims.height,
+  });
+
+  const hospitalName = normalizeTextForPdfLib((parcCoverInfo?.hospitalName || dataList[0]?.clientInfo.name || 'Hôpital').trim());
+  const address = normalizeTextForPdfLib((parcCoverInfo?.address || '').trim());
+  const demoDate = normalizeTextForPdfLib(formatDateJJMMAAAA(parcCoverInfo?.demoDate || dataList[0]?.clientInfo.demoDate || ''));
+
+  // Bloc établissement principal
+  coverPage.drawRectangle({
+    x: 56,
+    y: 552,
+    width: pageWidth - 112,
+    height: 126,
+    color: rgb(1, 1, 1),
+    borderColor: rgb(223 / 255, 210 / 255, 241 / 255),
+    borderWidth: 1.2,
+  });
+  coverPage.drawRectangle({ x: 56, y: 664, width: pageWidth - 112, height: 14, color: rgb(246 / 255, 242 / 255, 251 / 255) });
+
+  let hospitalFontSize = 42;
+  const hospitalMaxWidth = pageWidth - 150;
+  while (hospitalFontSize > 28 && fontBold.widthOfTextAtSize(hospitalName, hospitalFontSize) > hospitalMaxWidth) {
+    hospitalFontSize -= 2;
+  }
+  const hospitalLines = splitTextLines(hospitalName, fontBold, hospitalFontSize, hospitalMaxWidth);
+  const coverInfoLift = 72 / 25.4;
+  const hospitalY = 616 + coverInfoLift;
+  const hospitalLineGap = hospitalFontSize * 1.35;
+  const hospitalBlockBottomY = hospitalY - ((hospitalLines.length - 1) * hospitalLineGap);
+  let currentHospitalY = hospitalY;
+  hospitalLines.forEach((line: string) => {
+    const lineWidth = fontBold.widthOfTextAtSize(line, hospitalFontSize);
+    coverPage.drawText(line, {
+      x: centeredX(lineWidth),
+      y: currentHospitalY,
+      size: hospitalFontSize,
+      font: fontBold,
+      color: violetMain,
+    });
+    currentHospitalY -= hospitalLineGap;
+  });
+
+  const addressText = address ? normalizeTextForPdfLib(`Adresse: ${address}`) : normalizeTextForPdfLib('Adresse: Non renseignée');
+  const dateText = demoDate ? normalizeTextForPdfLib(`Date: ${demoDate}`) : normalizeTextForPdfLib('Date: Non renseignée');
+  const addressSize = 11;
+  const dateSize = 11;
+  const addressMaxWidth = pageWidth - 120;
+  const mmToPt = (mm: number): number => (mm * 72) / 25.4;
+  const hospitalToAddressGap = mmToPt(5);
+  const addressLift = mmToPt(6);
+  const addressToDateGap = mmToPt(3);
+  const addressLines = splitTextLines(addressText, fontBold, addressSize, addressMaxWidth);
+  const addressLineGap = addressSize * 1.35;
+  const addressY = hospitalBlockBottomY - hospitalFontSize - hospitalToAddressGap + addressLift;
+  const addressBlockBottomY = addressY - ((addressLines.length - 1) * addressLineGap);
+  let currentAddressY = addressY;
+  addressLines.forEach((line: string) => {
+    const lineWidth = fontBold.widthOfTextAtSize(line, addressSize);
+    coverPage.drawText(line, {
+      x: centeredX(lineWidth),
+      y: currentAddressY,
+      size: addressSize,
+      font: fontBold,
+      color: ink,
+    });
+    currentAddressY -= addressLineGap;
+  });
+  
+  coverPage.drawText(dateText, {
+    x: centeredX(fontBold.widthOfTextAtSize(dateText, dateSize)),
+    y: addressBlockBottomY - dateSize - addressToDateGap,
+    size: dateSize,
+    font: fontBold,
+    color: ink,
+  });
+
+  // Titre Sommaire
+  const sommaireTitleY = 500;
+  coverPage.drawRectangle({ x: 58, y: sommaireTitleY - 2, width: pageWidth - 116, height: 2, color: rgb(221 / 255, 210 / 255, 238 / 255) });
+  coverPage.drawText(normalizeTextForPdfLib('Sommaire'), {
+    x: 60,
+    y: sommaireTitleY,
+    size: 18,
+    font: fontBold,
+    color: violetMain,
+  });
+
+  let y = sommaireTitleY - 28;
+  dataList.forEach((item, idx) => {
+    const targetPageIndex = sectionStartPages[idx] + 1;
+    const service = normalizeTextForPdfLib(item.clientInfo.lieuService || 'Service non renseigné');
+    const device = normalizeTextForPdfLib(item.selectedDevice);
+    const rowHeight = 24;
+
+    coverPage.drawRectangle({
+      x: 60,
+      y: y - 6,
+      width: pageWidth - 120,
+      height: rowHeight,
+      color: idx % 2 === 0 ? rgb(1, 1, 1) : rgb(248 / 255, 245 / 255, 252 / 255),
+      borderColor: rgb(224 / 255, 212 / 255, 240 / 255),
+      borderWidth: 0.9,
+    });
+
+    const indexLabel = `#${idx + 1}`;
+    const indexLabelWidth = fontBold.widthOfTextAtSize(indexLabel, 9);
+    coverPage.drawRectangle({ x: 68, y: y - 1, width: 22, height: 12, color: violetMain, borderWidth: 0 });
+    coverPage.drawText(indexLabel, {
+      x: 79 - (indexLabelWidth / 2),
+      y: y + 2,
+      size: 9,
+      font: fontBold,
+      color: rgb(1, 1, 1),
+    });
+
+    const entry = normalizeTextForPdfLib(`${service}`);
+    const entryDevice = normalizeTextForPdfLib(`${device}`);
+    coverPage.drawText(entry, {
+      x: 98,
+      y: y + 2,
+      size: 10,
+      font: fontBold,
+      color: ink,
+    });
+    coverPage.drawText(entryDevice, {
+      x: 300,
+      y: y + 2,
+      size: 10,
+      font: fontRegular,
+      color: ink,
+    });
+    addInternalLink(mergedPdf, 0, 60, y - 6, pageWidth - 120, rowHeight, targetPageIndex);
+    y -= 28;
+  });
+
+  dataList.forEach((_, idx) => {
+    const sectionStart = sectionStartPages[idx] + 1;
+    const sectionEnd = ((idx + 1 < sectionStartPages.length) ? sectionStartPages[idx + 1] : totalBeforeCover);
+
+    for (let pageIndex = sectionStart; pageIndex <= sectionEnd; pageIndex++) {
+      const page = mergedPdf.getPage(pageIndex);
+      const { width } = page.getSize();
+      const rightText = normalizeTextForPdfLib(`Échographe ${idx + 1}/${dataList.length}`);
+
+      const rightTextWidth = fontBold.widthOfTextAtSize(rightText, 9);
+      const rightX = width - rightTextWidth - 20;
+      page.drawText(rightText, {
+        x: rightX,
+        y: 810.67,
+        size: 9,
+        font: fontBold,
+        color: rgb(1, 1, 1),
+      });
+
+      addInternalLink(mergedPdf, pageIndex, rightX - 2, 810.67, rightTextWidth + 4, 14, 0);
+    }
+  });
+
+  await redrawMergedFooters(mergedPdf, 'parc', 1);
+
+  const bytes = await mergedPdf.save();
+  const mergedArrayBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+  return new Blob([mergedArrayBuffer], { type: 'application/pdf' });
 };
 
 export const exportMultipleToExcel = async (dataList: PreparedData[]): Promise<void> => {
@@ -874,7 +1373,12 @@ export const exportMultipleToExcel = async (dataList: PreparedData[]): Promise<v
 
 export const exportMultipleToPDF = async (
   dataList: PreparedData[],
-  formRef: React.RefObject<HTMLFormElement>
+  formRef: React.RefObject<HTMLFormElement>,
+  options?: {
+    reportMode?: ReportMode;
+    parcCoverInfo?: ParcCoverInfo;
+    shouldSendEmail?: boolean;
+  }
 ): Promise<void> => {
   if (!formRef.current || !dataList.length) return;
 
@@ -893,32 +1397,42 @@ export const exportMultipleToPDF = async (
   document.body.appendChild(loadingDiv);
 
   try {
+    const reportMode = options?.reportMode ?? 'demo';
+    const shouldSendEmail = options?.shouldSendEmail ?? true;
     const blobs = dataList
       .map((data) => exportToExcel(data, {
         skipSave: true,
         returnBlob: true,
         includeClientInfo: true,
         clientInfoBannerOnly: false,
+        reportMode,
       }))
       .filter(Boolean) as Blob[];
 
     if (!blobs.length) return;
 
-    const mergedBlob = await mergePdfBlobs(blobs);
-    const fileName = buildMergedFileName(dataList);
+    const mergedBlob = reportMode === 'parc'
+      ? await buildParcMergedBlob(blobs, dataList, options?.parcCoverInfo)
+      : await mergePdfBlobs(blobs);
+
+    const fileName = buildMergedFileName(dataList, reportMode, options?.parcCoverInfo);
     saveAs(mergedBlob, fileName);
 
-    const firstData = dataList[0];
-    await sendEmail(
-      firstData.selectedCommercialEmails,
-      'Rapport de démonstration',
-      firstData.emailBody,
-      mergedBlob,
-      firstData.selectedIAEmails
-    );
+    if (shouldSendEmail) {
+      const firstData = dataList[0];
+      const subject = reportMode === 'parc' ? 'Rapport de gestion de parc' : 'Rapport de démonstration';
+      await sendEmail(
+        firstData.selectedCommercialEmails,
+        subject,
+        firstData.emailBody,
+        mergedBlob,
+        firstData.selectedIAEmails
+      );
+    }
   } catch (error) {
     console.error('Erreur lors de la génération du PDF multi:', error);
-    alert('Une erreur s\'est produite lors de la génération du PDF multi.');
+    const message = error instanceof Error ? error.message : String(error);
+    alert(`Une erreur s'est produite lors de la génération du PDF multi: ${message}`);
   } finally {
     document.body.removeChild(loadingDiv);
   }
