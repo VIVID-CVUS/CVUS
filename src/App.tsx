@@ -291,7 +291,6 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
     }
 
     setIsSavedTemplatesOpen(false);
-    alert(`Enregistrement "${selected.name}" appliqué.`);
   };
 
   const deleteSavedTemplate = (savedTemplateId: string): void => {

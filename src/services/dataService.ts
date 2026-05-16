@@ -228,7 +228,7 @@ type ExtendedJsPDF = jsPDF & {
   internal: PDFInternal;
 };
 
-const CONTENT_TOP_Y = 45;
+const CONTENT_TOP_Y = 50;
 const CONTENT_BOTTOM_Y = 285;
 
 type DrawHeaderFn = () => void;
@@ -481,30 +481,39 @@ export const exportToExcel = (
     const logoHeight = 10;  // hauteur en mm, ajustez selon votre image
     pdf.addImage(logoPng, 'PNG', 5, 5, logoWidth, logoHeight);
 
-    // 3️⃣ Titre de la démo, centré verticalement dans le bandeau
+    // 3️⃣ Titre/Service centré dans le bandeau
     pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(18);
     pdf.setFont('helvetica', 'bold');
-    const headerTitle = reportMode === 'parc'
-      ? `Gestion de Parc ${data.selectedDevice}`
-      : `Démonstration ${data.selectedDevice}`;
-    pdf.text(headerTitle, 105, 16, { align: 'center' });
+    
+    if (reportMode === 'parc') {
+      // Mode Parc: afficher Service et Appareil centrés, sans étiquettes
+      pdf.setFontSize(23);
+      const serviceName = data.clientInfo.lieuService || 'Service non renseigné';
+      pdf.text(serviceName, 105, 14, { align: 'center' });
 
-    // 4️⃣ Info client et date (sous le bandeau)
-    pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'normal');
-    let headerTextY = 24;
-    if (data.clientInfo.name?.trim()) {
-      pdf.text(`Client: ${data.clientInfo.name}`, 105, headerTextY, { align: 'center' });
-      headerTextY += 7;
-    }
-    if (data.clientInfo.demoDate?.trim()) {
-      pdf.text(
-        `Date: ${formatDateJJMMAAAA(data.clientInfo.demoDate)}`,
-        105,
-        headerTextY,
-        { align: 'center' }
-      );
+      pdf.setFontSize(20);
+      pdf.text(data.selectedDevice, 105, 25, { align: 'center' });
+    } else {
+      // Mode Démo: afficher le titre original avec Client et Date
+      pdf.setFontSize(18);
+      const headerTitle = `Démonstration ${data.selectedDevice}`;
+      pdf.text(headerTitle, 105, 16, { align: 'center' });
+      // 4️⃣ Info client et date (sous le bandeau)
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      let headerTextY = 24;
+      if (data.clientInfo.name?.trim()) {
+        pdf.text(`Client: ${data.clientInfo.name}`, 105, headerTextY, { align: 'center' });
+        headerTextY += 7;
+      }
+      if (data.clientInfo.demoDate?.trim()) {
+        pdf.text(
+          `Date: ${formatDateJJMMAAAA(data.clientInfo.demoDate)}`,
+          105,
+          headerTextY,
+          { align: 'center' }
+        );
+      }
     }
   };
 
@@ -654,7 +663,7 @@ export const exportToExcel = (
   drawHeader();
 
   // Infos client
-  let yPosition = 45;
+  let yPosition = CONTENT_TOP_Y;
   const hasClientInfoRows = Boolean(
     data.clientInfo.name?.trim()
     || data.clientInfo.email?.trim()
@@ -696,33 +705,44 @@ export const exportToExcel = (
     if (clientInfoTable.length > 0) {
       const infoHeaders = ['Information', 'Détail'];
       const infoColWidths = [90, 90];
+      const infoHeaderHeight = 8;
+      const infoCellPaddingX = 3;
+      const infoCellPaddingY = 3;
+      const infoLineHeight = 4;
+      const infoMinRowHeight = 8;
       pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      pdf.rect(15, yPosition, 180, 8, 'F');
+      pdf.rect(15, yPosition, 180, infoHeaderHeight, 'F');
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
       let xInfo = 15;
       infoHeaders.forEach((header, i) => {
-        pdf.text(header, xInfo + 3, yPosition + 5);
+        pdf.text(header, i === 0 ? 18 : 105, yPosition + 5);
         xInfo += infoColWidths[i];
       });
-      yPosition += 8;
+      yPosition += infoHeaderHeight;
 
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(50, 50, 50);
       clientInfoTable.forEach((row, idx) => {
         const safeLabel = normalizeTextForPdf(row[0]);
         const safeValue = normalizeTextForPdf(row[1]);
+        const labelLines = pdf.splitTextToSize(safeLabel, infoColWidths[0] - (infoCellPaddingX * 2)) as string[];
+        const valueLines = pdf.splitTextToSize(safeValue, infoColWidths[1] - (infoCellPaddingX * 2)) as string[];
+        const maxLines = Math.max(labelLines.length, valueLines.length);
+        const infoRowHeight = Math.max(infoMinRowHeight, (maxLines * infoLineHeight) + (infoCellPaddingY * 2));
+
+        yPosition = ensureVerticalSpace(pdf, drawHeader, yPosition, infoRowHeight);
         pdf.setFillColor(idx % 2 === 0 ? 245 : 245, 245, 245);
-        pdf.rect(15, yPosition, 180, 8, 'F');
-        pdf.text(safeLabel, 18, yPosition + 5);
-        pdf.text(safeValue, 105, yPosition + 5);
-        yPosition += 8;
+        pdf.rect(15, yPosition, 180, infoRowHeight, 'F');
+        pdf.text(labelLines, 18, yPosition + infoCellPaddingY + infoLineHeight - 1);
+        pdf.text(valueLines, 105, yPosition + infoCellPaddingY + infoLineHeight - 1);
+        yPosition += infoRowHeight;
       });
 
       pdf.setFillColor(255, 255, 255);
       pdf.rect(15, yPosition, 180, 8, 'F');
-      yPosition += 8;
+      yPosition += 5;
     }
   }
 
@@ -783,7 +803,7 @@ export const exportToExcel = (
       xAvisVal += avisColWidths[i];
     });
     yPosition += maxAvisHeight;
-    yPosition += 8;
+    yPosition += 5;
   }
 
   if (includeClientInfo && data.clientInfo.generalRemarks?.trim()) {
@@ -807,15 +827,15 @@ export const exportToExcel = (
     });
     pdf.setFillColor(255, 255, 255);
     pdf.rect(15, yPosition, 180, 7, 'F');
-    yPosition += 7;
+    yPosition += 10;
   }
 
   // Sondes
   // drawSectionTitle dessine le bandeau à yPos - 6, on compense pour conserver 5mm blancs visibles.
-  yPosition += 6;
-  yPosition = drawSectionTitle('Sondes', yPosition);
+  yPosition += 5;
+  yPosition = drawSectionTitle('Sonde', yPosition);
 
-  const sondesHeaders = ['Catégorie', 'Sonde', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
+  const sondesHeaders = ['Sonde', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
   const sondesRows: string[][] = [];
 
   if (data.sondes.data && data.sondes.data.length > 0) {
@@ -829,7 +849,6 @@ export const exportToExcel = (
 
     sortedSondes.forEach(sonde => {
       sondesRows.push([
-        categorizeSondeForPdf(sonde.name),
         sonde.name,
         sonde.presented ? 'oui' : 'non',
         sonde.appreciated ? 'oui' : 'non',
@@ -837,15 +856,15 @@ export const exportToExcel = (
       ]);
     });
   } else {
-    sondesRows.push(['', 'Aucune sonde sélectionnée', '', '', '']);
+    sondesRows.push(['Aucune sonde sélectionnée', '', '', '']);
   }
 
   yPosition = drawTable(sondesHeaders, sondesRows, yPosition);
   yPosition = addCommentBox(data.sondes.comments, yPosition);
-  yPosition += 2;
+  yPosition += 5;
 
   // Fonctionnalités
-  yPosition += 3;
+  yPosition += 5;
   yPosition = drawSectionTitle('Option Software', yPosition);
 
   const featuresHeaders = ['Option Software', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
@@ -866,10 +885,10 @@ export const exportToExcel = (
 
   yPosition = drawTable(featuresHeaders, featuresRows, yPosition);
   yPosition = addCommentBox(data.features.comments, yPosition);
-  yPosition += 2;
+  yPosition += 5;
 
   // Options matérielles
-  yPosition += 3;
+  yPosition += 5;
   yPosition = drawSectionTitle('Option Hardware', yPosition);
 
   const hardwareHeaders = ['Option Hardware', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
@@ -890,10 +909,10 @@ export const exportToExcel = (
 
   yPosition = drawTable(hardwareHeaders, hardwareRows, yPosition);
   yPosition = addCommentBox(data.hardware.comments, yPosition);
-  yPosition += 2;
+  yPosition += 5;
 
   // Options de connexion
-  yPosition += 3;
+  yPosition += 5;
   yPosition = drawSectionTitle('Connectivité et imprimante', yPosition);
 
   const connexHeaders = ['Connectivité et imprimante', 'Présentée', 'Souhaitée', 'Non Souhaitée'];
@@ -914,7 +933,7 @@ export const exportToExcel = (
 
   yPosition = drawTable(connexHeaders, connexRows, yPosition);
   yPosition = addCommentBox(data.connex.comments, yPosition);
-  yPosition += 15;
+  yPosition += 5;
 
   // Section Médecins
     // ...le tableau médecins est déjà affiché plus haut, on retire la redéclaration...
@@ -965,12 +984,54 @@ const mergePdfBlobs = async (blobs: Blob[]): Promise<Blob> => {
     pages.forEach((page) => mergedPdf.addPage(page));
   }
 
+  await redrawMergedFooters(mergedPdf, 'demo');
+
   const mergedBytes = await mergedPdf.save();
   const mergedArrayBuffer = mergedBytes.buffer.slice(
     mergedBytes.byteOffset,
     mergedBytes.byteOffset + mergedBytes.byteLength
   ) as ArrayBuffer;
   return new Blob([mergedArrayBuffer], { type: 'application/pdf' });
+};
+
+const redrawMergedFooters = async (
+  pdfDoc: PDFDocument,
+  reportMode: ReportMode,
+  startPageIndex = 0
+): Promise<void> => {
+  const pages = pdfDoc.getPages().slice(startPageIndex);
+
+  if (!pages.length) {
+    return;
+  }
+
+  const footerFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const footerTitle = reportMode === 'parc' ? 'Rapport de gestion de parc' : 'Rapport de démonstration';
+  const footerHeight = 28.35;
+  const footerTextY = 11.34;
+
+  pages.forEach((page, index) => {
+    const { width } = page.getSize();
+    const pageNumber = index + 1;
+    const text = `GE Healthcare - ${footerTitle} - Page ${pageNumber}/${pages.length}`;
+    const textWidth = footerFont.widthOfTextAtSize(text, 8);
+
+    page.drawRectangle({
+      x: 0,
+      y: 0,
+      width,
+      height: footerHeight,
+      color: rgb(240 / 255, 240 / 255, 240 / 255),
+    });
+
+    page.drawText(text, {
+      x: (width - textWidth) / 2,
+      y: footerTextY,
+      size: 8,
+      font: footerFont,
+      color: rgb(100 / 255, 100 / 255, 100 / 255),
+    });
+  });
 };
 
 const buildMergedFileName = (
@@ -980,10 +1041,14 @@ const buildMergedFileName = (
 ): string => {
   const first = dataList[0];
   const datePart = new Date().toISOString().split('T')[0];
-  const prefix = reportMode === 'parc' ? 'GestionParc' : 'Démo';
-  const entity = reportMode === 'parc'
-    ? (parcCoverInfo?.hospitalName?.trim() || first.clientInfo.name || 'Hopital')
-    : (first.clientInfo.name || 'Client');
+
+  if (reportMode === 'parc') {
+    const hospitalName = (parcCoverInfo?.hospitalName?.trim() || first.clientInfo.name?.trim() || 'Hopital');
+    return `Gestion_de_Parc_${hospitalName}_${datePart}.pdf`;
+  }
+
+  const prefix = 'Démo';
+  const entity = first.clientInfo.name || 'Client';
 
   if (dataList.length === 1) {
     return `${prefix}_${first.selectedDevice}_${entity}_${datePart}.pdf`;
@@ -1099,6 +1164,7 @@ const buildParcMergedBlob = async (
   const centerX = pageWidth / 2;
   const violetMain = rgb(96 / 255, 34 / 255, 166 / 255);
   const ink = rgb(32 / 255, 33 / 255, 40 / 255);
+  const centeredX = (textWidth: number): number => Math.round(centerX - (textWidth / 2));
 
   // Fond et structure institutionnelle
   coverPage.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: rgb(252 / 255, 251 / 255, 254 / 255) });
@@ -1106,11 +1172,11 @@ const buildParcMergedBlob = async (
   coverPage.drawRectangle({ x: 0, y: 694, width: pageWidth, height: 6, color: violetMain });
   coverPage.drawRectangle({ x: 40, y: 530, width: pageWidth - 80, height: 2, color: violetMain });
 
-  const heroTitle = normalizeTextForPdfLib('Gestion de Parc');
+  const heroTitle = normalizeTextForPdfLib('GESTION DE PARC');
   const heroTitleSize = 32;
   const heroTitleWidth = fontBold.widthOfTextAtSize(heroTitle, heroTitleSize);
   coverPage.drawText(heroTitle, {
-    x: centerX - (heroTitleWidth / 2),
+    x: centeredX(heroTitleWidth),
     y: 786,
     size: heroTitleSize,
     font: fontBold,
@@ -1147,17 +1213,21 @@ const buildParcMergedBlob = async (
     hospitalFontSize -= 2;
   }
   const hospitalLines = splitTextLines(hospitalName, fontBold, hospitalFontSize, hospitalMaxWidth);
-  let hospitalY = 600;
+  const coverInfoLift = 72 / 25.4;
+  const hospitalY = 616 + coverInfoLift;
+  const hospitalLineGap = hospitalFontSize * 1.35;
+  const hospitalBlockBottomY = hospitalY - ((hospitalLines.length - 1) * hospitalLineGap);
+  let currentHospitalY = hospitalY;
   hospitalLines.forEach((line: string) => {
     const lineWidth = fontBold.widthOfTextAtSize(line, hospitalFontSize);
     coverPage.drawText(line, {
-      x: centerX - (lineWidth / 2),
-      y: hospitalY,
+      x: centeredX(lineWidth),
+      y: currentHospitalY,
       size: hospitalFontSize,
       font: fontBold,
       color: violetMain,
     });
-    hospitalY -= hospitalFontSize * 1.35;
+    currentHospitalY -= hospitalLineGap;
   });
 
   const addressText = address ? normalizeTextForPdfLib(`Adresse: ${address}`) : normalizeTextForPdfLib('Adresse: Non renseignée');
@@ -1165,23 +1235,30 @@ const buildParcMergedBlob = async (
   const addressSize = 11;
   const dateSize = 11;
   const addressMaxWidth = pageWidth - 120;
+  const mmToPt = (mm: number): number => (mm * 72) / 25.4;
+  const hospitalToAddressGap = mmToPt(5);
+  const addressLift = mmToPt(6);
+  const addressToDateGap = mmToPt(3);
   const addressLines = splitTextLines(addressText, fontBold, addressSize, addressMaxWidth);
-  let addressY = 565;
+  const addressLineGap = addressSize * 1.35;
+  const addressY = hospitalBlockBottomY - hospitalFontSize - hospitalToAddressGap + addressLift;
+  const addressBlockBottomY = addressY - ((addressLines.length - 1) * addressLineGap);
+  let currentAddressY = addressY;
   addressLines.forEach((line: string) => {
     const lineWidth = fontBold.widthOfTextAtSize(line, addressSize);
     coverPage.drawText(line, {
-      x: centerX - (lineWidth / 2),
-      y: addressY,
+      x: centeredX(lineWidth),
+      y: currentAddressY,
       size: addressSize,
       font: fontBold,
       color: ink,
     });
-    addressY -= addressSize * 1.35;
+    currentAddressY -= addressLineGap;
   });
   
   coverPage.drawText(dateText, {
-    x: centerX - (fontBold.widthOfTextAtSize(dateText, dateSize) / 2),
-    y: addressY - 8,
+    x: centeredX(fontBold.widthOfTextAtSize(dateText, dateSize)),
+    y: addressBlockBottomY - dateSize - addressToDateGap,
     size: dateSize,
     font: fontBold,
     color: ink,
@@ -1246,37 +1323,30 @@ const buildParcMergedBlob = async (
     y -= 28;
   });
 
-  dataList.forEach((item, idx) => {
+  dataList.forEach((_, idx) => {
     const sectionStart = sectionStartPages[idx] + 1;
     const sectionEnd = ((idx + 1 < sectionStartPages.length) ? sectionStartPages[idx + 1] : totalBeforeCover);
 
     for (let pageIndex = sectionStart; pageIndex <= sectionEnd; pageIndex++) {
       const page = mergedPdf.getPage(pageIndex);
       const { width } = page.getSize();
-      const leftText = normalizeTextForPdfLib(`Service: ${item.clientInfo.lieuService || 'Non renseigné'} | Échographe: ${item.selectedDevice}`);
       const rightText = normalizeTextForPdfLib(`Échographe ${idx + 1}/${dataList.length}`);
-
-      page.drawText(leftText, {
-        x: 16,
-        y: 807,
-        size: 9,
-        font: fontBold,
-        color: rgb(1, 1, 1),
-      });
 
       const rightTextWidth = fontBold.widthOfTextAtSize(rightText, 9);
       const rightX = width - rightTextWidth - 20;
       page.drawText(rightText, {
         x: rightX,
-        y: 807,
+        y: 810.67,
         size: 9,
         font: fontBold,
         color: rgb(1, 1, 1),
       });
 
-      addInternalLink(mergedPdf, pageIndex, rightX - 2, 804, rightTextWidth + 4, 14, 0);
+      addInternalLink(mergedPdf, pageIndex, rightX - 2, 810.67, rightTextWidth + 4, 14, 0);
     }
   });
+
+  await redrawMergedFooters(mergedPdf, 'parc', 1);
 
   const bytes = await mergedPdf.save();
   const mergedArrayBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
