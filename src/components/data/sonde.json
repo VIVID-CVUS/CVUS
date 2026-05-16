@@ -106,7 +106,7 @@
   { "id": 14, "name": "P2D", "presented": false, "appreciated": false, "wanted": false },
   { "id": 15, "name": "P6D", "presented": false, "appreciated": false, "wanted": false },
   { "id": 16, "name": "6VT-D", "presented": false, "appreciated": false, "wanted": false },
-  { "id": 17, "name": "9VT-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 17, "name": "9VT", "presented": false, "appreciated": false, "wanted": false },
   { "id": 18, "name": "9T", "presented": false, "appreciated": false, "wanted": false },
   { "id": 19, "name": "10T-D", "presented": false, "appreciated": false, "wanted": false }
 ]

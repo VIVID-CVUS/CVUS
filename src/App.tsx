@@ -2,8 +2,7 @@
 import { ChangeEvent, JSX, useEffect, useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ActionButtons from './components/Actions/ActionButtons';
-import Login, { AppMode } from './components/Auth/Login';
-import Comparateur from './components/Comparateur/Comparateur';
+import Login from './components/Auth/Login';
 import ClientInfo from './components/Client/ClientInfo';
 import EmailBodyEditor from './components/Client/EmailBodyEditor.tsx';
 import CommercialSelect from './components/Client/PeopleSelect';
@@ -84,12 +83,6 @@ type EchoPage = {
   indecisNotes: string;
 };
 
-type ParcCoverInfo = {
-  hospitalName: string;
-  demoDate: string;
-  address: string;
-};
-
 type EchoTemplate = Pick<
   EchoPage,
   | 'selectedDevice'
@@ -112,9 +105,6 @@ type SavedTemplate = {
   name: string;
   createdAt: string;
   template: EchoTemplate;
-  echoPages?: EchoTemplate[];
-  activeEchoIndex?: number;
-  parcCoverInfo?: ParcCoverInfo;
 };
 
 type RawDeviceItem = {
@@ -149,36 +139,7 @@ const createEmptyEchoPage = (): EchoPage => ({
   indecisNotes: '',
 });
 
-const toEchoTemplate = (page: EchoPage): EchoTemplate => ({
-  selectedDevice: page.selectedDevice,
-  selectedSondes: page.selectedSondes,
-  selectedFeatures: page.selectedFeatures,
-  selectedHardware: page.selectedHardware,
-  selectedConnex: page.selectedConnex,
-  sondesComments: page.sondesComments,
-  featuresComments: page.featuresComments,
-  hardwareComments: page.hardwareComments,
-  connexComments: page.connexComments,
-  generalRemarks: page.generalRemarks,
-  promoteurNotes: page.promoteurNotes,
-  detracteurNotes: page.detracteurNotes,
-  indecisNotes: page.indecisNotes,
-});
-
-const fromEchoTemplate = (template: EchoTemplate): EchoPage => ({
-  ...createEmptyEchoPage(),
-  ...template,
-});
-
-const APP_MODES: { key: AppMode; label: string }[] = [
-  { key: 'demo', label: 'Démo' },
-  { key: 'parc', label: 'Gestion de Parc' },
-  { key: 'comparateur', label: 'Comparateur' },
-];
-
-type ProductMode = Exclude<AppMode, 'comparateur'>;
-
-function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwitchModule: (m: AppMode) => void }): JSX.Element {
+function Product(): JSX.Element {
   const formRef = useRef<HTMLFormElement>(null);
 
   const [echoPages, setEchoPages] = useState<EchoPage[]>([createEmptyEchoPage()]);
@@ -189,12 +150,6 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
   const [selectedIAEmails, setSelectedIAEmails] = useState<string[]>([]);
   const [isSavedTemplatesOpen, setIsSavedTemplatesOpen] = useState<boolean>(false);
   const [savedTemplates, setSavedTemplates] = useState<SavedTemplate[]>([]);
-  const [isModuleMenuOpen, setIsModuleMenuOpen] = useState<boolean>(false);
-  const [parcCoverInfo, setParcCoverInfo] = useState<ParcCoverInfo>({
-    hospitalName: '',
-    demoDate: '',
-    address: '',
-  });
 
   // État pour le corps du mail
   const [emailBody, setEmailBody] = useState<string>(() =>
@@ -225,16 +180,12 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
   }, []);
 
   const saveCurrentAsTemplate = (): void => {
-    const hasAtLeastOneDevice = echoPages.some((page) => page.selectedDevice);
-    if (!hasAtLeastOneDevice) {
-      alert('Veuillez sélectionner au moins un échographe avant d\'enregistrer un modèle.');
+    if (!activeEcho.selectedDevice) {
+      alert('Veuillez sélectionner un échographe avant d\'enregistrer un modèle.');
       return;
     }
 
-    const selectedCount = echoPages.filter((page) => page.selectedDevice).length;
-    const defaultName = selectedCount > 1
-      ? `Configuration ${selectedCount} échographes - ${new Date().toLocaleDateString('fr-FR')}`
-      : `${activeEcho.selectedDevice} - ${new Date().toLocaleDateString('fr-FR')}`;
+    const defaultName = `${activeEcho.selectedDevice} - ${new Date().toLocaleDateString('fr-FR')}`;
     const inputName = window.prompt('Nom de l\'enregistrement :', defaultName);
     if (inputName === null) return;
 
@@ -244,8 +195,21 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
       return;
     }
 
-    const template: EchoTemplate = toEchoTemplate(activeEcho);
-    const echoPagesTemplates: EchoTemplate[] = echoPages.map(toEchoTemplate);
+    const template: EchoTemplate = {
+      selectedDevice: activeEcho.selectedDevice,
+      selectedSondes: activeEcho.selectedSondes,
+      selectedFeatures: activeEcho.selectedFeatures,
+      selectedHardware: activeEcho.selectedHardware,
+      selectedConnex: activeEcho.selectedConnex,
+      sondesComments: activeEcho.sondesComments,
+      featuresComments: activeEcho.featuresComments,
+      hardwareComments: activeEcho.hardwareComments,
+      connexComments: activeEcho.connexComments,
+      generalRemarks: activeEcho.generalRemarks,
+      promoteurNotes: activeEcho.promoteurNotes,
+      detracteurNotes: activeEcho.detracteurNotes,
+      indecisNotes: activeEcho.indecisNotes,
+    };
 
     try {
       const nextTemplates = [
@@ -254,9 +218,6 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
           name: trimmedName,
           createdAt: new Date().toISOString(),
           template,
-          echoPages: echoPagesTemplates,
-          activeEchoIndex,
-          parcCoverInfo,
         },
         ...readSavedTemplates(),
       ];
@@ -271,26 +232,26 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
     const selected = savedTemplates.find((item) => item.id === savedTemplateId);
     if (!selected) return;
 
-    if (selected.echoPages && selected.echoPages.length > 0) {
-      const restoredPages = selected.echoPages.map(fromEchoTemplate);
-      setEchoPages(restoredPages);
-
-      const maxIndex = Math.max(0, restoredPages.length - 1);
-      const restoredIndex = Math.min(selected.activeEchoIndex ?? 0, maxIndex);
-      setActiveEchoIndex(restoredIndex);
-
-      if (selected.parcCoverInfo) {
-        setParcCoverInfo(selected.parcCoverInfo);
-      }
-    } else {
-      const { template } = selected;
-      updateActiveEcho((prev) => ({
-        ...prev,
-        ...fromEchoTemplate(template),
-      }));
-    }
+    const { template } = selected;
+    updateActiveEcho((prev) => ({
+      ...prev,
+      selectedDevice: template.selectedDevice,
+      selectedSondes: template.selectedSondes,
+      selectedFeatures: template.selectedFeatures,
+      selectedHardware: template.selectedHardware,
+      selectedConnex: template.selectedConnex,
+      sondesComments: template.sondesComments,
+      featuresComments: template.featuresComments,
+      hardwareComments: template.hardwareComments,
+      connexComments: template.connexComments,
+      generalRemarks: template.generalRemarks,
+      promoteurNotes: template.promoteurNotes,
+      detracteurNotes: template.detracteurNotes,
+      indecisNotes: template.indecisNotes,
+    }));
 
     setIsSavedTemplatesOpen(false);
+    alert(`Enregistrement "${selected.name}" appliqué.`);
   };
 
   const deleteSavedTemplate = (savedTemplateId: string): void => {
@@ -388,7 +349,7 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
         prepareData({
           clientName: page.clientName,
           clientEmail: page.clientEmail,
-          demoDate: mode === 'parc' ? parcCoverInfo.demoDate : page.demoDate,
+          demoDate: page.demoDate,
           lieuService: page.lieuService,
           generalRemarks: page.generalRemarks,
           selectedDevice: page.selectedDevice,
@@ -438,21 +399,15 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
   };
 
   // Fonctions pour les boutons d'action (restent inchangées)
-  const downloadPdf = async (): Promise<void> => {
-    const { exportMultipleToPDF } = await import('./services/dataService');
+  const sendExcelToCommercial = async (): Promise<void> => {
+    const { exportMultipleToExcel } = await import('./services/dataService');
     const preparedDataList = await buildPreparedDataList();
     if (!preparedDataList.length) {
       alert('Veuillez sélectionner au moins un échographe avant le téléchargement.');
       return;
     }
 
-    if (formRef.current) {
-      await exportMultipleToPDF(preparedDataList, formRef as React.RefObject<HTMLFormElement>, {
-        reportMode: mode,
-        parcCoverInfo,
-        shouldSendEmail: false,
-      });
-    }
+    await exportMultipleToExcel(preparedDataList);
   };
 
   const sendPdfToCommercial = async (): Promise<void> => {
@@ -471,10 +426,7 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
     }
 
     if (formRef.current) {
-      await exportMultipleToPDF(preparedDataList, formRef as React.RefObject<HTMLFormElement>, {
-        reportMode: mode,
-        parcCoverInfo,
-      });
+      await exportMultipleToPDF(preparedDataList, formRef as React.RefObject<HTMLFormElement>);
     }
   };
 
@@ -493,38 +445,11 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
     }));
   };
 
-  const modeLabel = mode === 'parc' ? 'Gestion de Parc' : 'Démo';
-
   return (
     <FormContainer formRef={formRef}>
       <div className="mb-4 bg-white rounded-lg shadow p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap gap-2 items-center">
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setIsModuleMenuOpen((v) => !v)}
-                className="text-xs font-semibold uppercase tracking-wide text-white bg-purple-700 px-3 py-1.5 rounded hover:bg-purple-600 transition-colors flex items-center gap-1"
-              >
-                {modeLabel} <span className="text-purple-300">▾</span>
-              </button>
-              {isModuleMenuOpen && (
-                <div className="absolute left-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-w-[180px]">
-                  {APP_MODES.map(({ key, label }) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => { onSwitchModule(key); setIsModuleMenuOpen(false); }}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-purple-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
-                        key === mode ? 'font-semibold text-purple-800 bg-purple-50' : 'text-gray-700'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
             {echoPages.map((_, index) => (
               <button
                 key={`echo-page-${index}`}
@@ -551,52 +476,7 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
         </div>
       </div>
 
-      {mode === 'parc' && (
-        <div className="mb-6 bg-white rounded-lg shadow p-4">
-          <h2 className="text-xl font-bold mb-3 text-purple-800">Informations Site (Page de garde)</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="parcHospitalName">
-                Nom hôpital
-              </label>
-              <input
-                id="parcHospitalName"
-                type="text"
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-600"
-                value={parcCoverInfo.hospitalName}
-                onChange={(e) => setParcCoverInfo((prev) => ({ ...prev, hospitalName: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="parcDemoDate">
-                Date démonstration
-              </label>
-              <input
-                id="parcDemoDate"
-                type="date"
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-600"
-                value={parcCoverInfo.demoDate}
-                onChange={(e) => setParcCoverInfo((prev) => ({ ...prev, demoDate: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="parcAddress">
-                Adresse
-              </label>
-              <input
-                id="parcAddress"
-                type="text"
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-600"
-                value={parcCoverInfo.address}
-                onChange={(e) => setParcCoverInfo((prev) => ({ ...prev, address: e.target.value }))}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
       <ClientInfo
-        mode={mode}
         clientName={activeEcho.clientName}
         clientEmail={activeEcho.clientEmail}
         demoDate={activeEcho.demoDate}
@@ -708,7 +588,7 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
                 addEchographe={addEchographePage}
                 saveTemplate={saveCurrentAsTemplate}
                 hasSelectedDevice={!!activeEcho.selectedDevice}
-                downloadPdf={downloadPdf}
+                downloadPdf={sendExcelToCommercial}
                 sendPdfToCommercial={sendPdfToCommercial}
               />
             </div>
@@ -740,10 +620,7 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                       <p className="font-semibold text-gray-800">{item.name}</p>
-                      <p className="text-sm text-gray-600">
-                        Échographes: {item.echoPages?.length ?? 1}
-                      </p>
-                      <p className="text-sm text-gray-600">Produit principal: {item.template.selectedDevice || 'Non défini'}</p>
+                      <p className="text-sm text-gray-600">Produit: {item.template.selectedDevice || 'Non défini'}</p>
                       <p className="text-xs text-gray-500">
                         Créé le {new Date(item.createdAt).toLocaleString('fr-FR')}
                       </p>
@@ -778,27 +655,16 @@ function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwit
 
 function ProductWithAuth(): JSX.Element {
   const { isAuthenticated, login } = useAuth();
-  const [appMode, setAppMode] = useState<AppMode>('demo');
 
   if (!isAuthenticated) {
-    return (
-      <Login
-        onLogin={(password, mode) => {
-          if (login(password)) {
-            setAppMode(mode);
-          } else {
-            alert('Mot de passe incorrect');
-          }
-        }}
-      />
-    );
+    return <Login onLogin={(password) => {
+      if (!login(password)) {
+        alert('Mot de passe incorrect');
+      }
+    }} />;
   }
 
-  if (appMode === 'comparateur') {
-    return <Comparateur onLogout={() => { window.location.reload(); }} onSwitchModule={setAppMode} />;
-  }
-
-  return <Product mode={appMode} onSwitchModule={setAppMode} />;
+  return <Product />;
 }
 
 export default function App(): JSX.Element {
