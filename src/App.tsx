@@ -15,6 +15,7 @@ import TableWithComments from './components/Tables/TableWithComments';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import MedecinsTable from './components/Client/MedecinsTable';
 
+
 // Types définitions inchangées...
 interface Sonde {
   id: string;
