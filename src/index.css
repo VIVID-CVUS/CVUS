@@ -2,6 +2,20 @@
 @tailwind utilities;
 @import "tailwindcss";
 
+textarea,
+input,
+select,
+option,
+button,
+th,
+td,
+label,
+p,
+span,
+div {
+  text-align: left;
+}
+
 /* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
