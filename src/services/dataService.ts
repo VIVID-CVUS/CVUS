@@ -337,7 +337,7 @@ const drawPaginatedGrayBox = ({
     pdf.setTextColor(bodyTextColor[0], bodyTextColor[1], bodyTextColor[2]);
     pdf.setFontSize(bodyFontSize);
     pdf.text(chunk.join('\n'), textX, currentY + topPadding, {
-      align: 'justify',
+      align: 'left',
       maxWidth: textBoxWidth,
       lineHeightFactor,
     });
@@ -784,8 +784,6 @@ export const exportToExcel = (
     pdf.setFontSize(10);
     pdf.setTextColor(50, 50, 50);
     const avisLineHeight = 5;
-    const avisMmPerPoint = 0.352778;
-    const avisLineHeightFactor = avisLineHeight / (10 * avisMmPerPoint);
     let xAvisVal = 15;
     avisLinesArr.forEach((avisLines, i) => {
       // Promoteur et Indécis : gris, Rétracteur : blanc
@@ -795,10 +793,9 @@ export const exportToExcel = (
         pdf.setFillColor(245, 245, 245); // Autres en gris
       }
       pdf.rect(xAvisVal, yPosition, avisColWidths[i], maxAvisHeight, 'F');
-      pdf.text(avisLines.join('\n'), xAvisVal + 3, yPosition + 6, {
-        align: 'justify',
+      pdf.text(avisLines, xAvisVal + 3, yPosition + 6, {
+        align: 'left',
         maxWidth: avisColWidths[i] - 6,
-        lineHeightFactor: avisLineHeightFactor,
       });
       xAvisVal += avisColWidths[i];
     });
@@ -1076,7 +1073,7 @@ const addInternalLink = (
     return;
   }
 
-  const sourcePage = pages[sourcePageIndex] as unknown as { node: { lookupMaybe?: (name: unknown, type: unknown) => PDFArray | undefined; lookup?: (name: unknown, type: unknown) => PDFArray | undefined; set?: (name: unknown, value: unknown) => void; }; ref: unknown; };
+  const sourcePage = pages[sourcePageIndex] as unknown as { node: { lookupMaybe?: (name: unknown, type: unknown) => PDFArray | undefined; lookup?: (name: unknown, type: unknown) => PDFArray | undefined; set: (name: unknown, value: unknown) => void } };
   const targetPage = pages[targetPageIndex] as unknown as { ref: unknown };
 
   const linkAnnot = (pdfDoc.context as any).obj({
@@ -1478,4 +1475,3 @@ export const sendEmail = async (
     throw error;
   }
 };
-
