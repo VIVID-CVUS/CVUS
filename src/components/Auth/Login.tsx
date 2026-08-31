@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export type AppMode = 'demo' | 'parc' | 'comparateur';
+export type AppMode = 'demo' | 'parc' | 'comparateur' | 'audit';
 
 interface LoginProps {
   onLogin: (password: string, mode: AppMode) => void;
@@ -8,8 +8,9 @@ interface LoginProps {
 
 const MODES: { key: AppMode; label: string; description: string }[] = [
   { key: 'demo', label: 'Démo', description: 'Rapport de démonstration' },
-  { key: 'parc', label: 'Gestion de Parc', description: 'Gestion et suivi de parc' },
+  { key: 'parc', label: 'Gestion de Parc', description: 'Rapport de gestion de parc' },
   { key: 'comparateur', label: 'Comparateur', description: 'Comparer les modèles' },
+  { key: 'audit', label: 'Audit', description: 'Créer un rapport d’audit PDF' },
 ];
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
@@ -24,7 +25,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-[420px]">
-        <h2 className="text-2xl font-bold mb-6 text-center text-purple-800">
+        <h2 className="text-xl font-bold mb-6 text-center text-purple-800">
           GE Healthcare
         </h2>
 

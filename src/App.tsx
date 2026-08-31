@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ActionButtons from './components/Actions/ActionButtons';
 import Login, { AppMode } from './components/Auth/Login';
 import Comparateur from './components/Comparateur/Comparateur';
+import Audit from './components/Audit/Audit';
 import ClientInfo from './components/Client/ClientInfo';
 import EmailBodyEditor from './components/Client/EmailBodyEditor.tsx';
 import CommercialSelect from './components/Client/PeopleSelect';
@@ -175,9 +176,10 @@ const APP_MODES: { key: AppMode; label: string }[] = [
   { key: 'demo', label: 'Démo' },
   { key: 'parc', label: 'Gestion de Parc' },
   { key: 'comparateur', label: 'Comparateur' },
+  { key: 'audit', label: 'Audit' },
 ];
 
-type ProductMode = Exclude<AppMode, 'comparateur'>;
+type ProductMode = Exclude<AppMode, 'comparateur' | 'audit'>;
 
 function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwitchModule: (m: AppMode) => void }): JSX.Element {
   const formRef = useRef<HTMLFormElement>(null);
@@ -797,6 +799,10 @@ function ProductWithAuth(): JSX.Element {
 
   if (appMode === 'comparateur') {
     return <Comparateur onLogout={() => { window.location.reload(); }} onSwitchModule={setAppMode} />;
+  }
+
+  if (appMode === 'audit') {
+    return <Audit onSwitchModule={setAppMode} />;
   }
 
   return <Product mode={appMode} onSwitchModule={setAppMode} />;

@@ -107,6 +107,7 @@ const APP_MODES: { key: AppMode; label: string }[] = [
   { key: 'demo', label: 'Démo' },
   { key: 'parc', label: 'Gestion de Parc' },
   { key: 'comparateur', label: 'Comparateur' },
+  { key: 'audit', label: 'Audit' },
 ];
 
 interface ComparateurProps {
