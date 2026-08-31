@@ -63,28 +63,6 @@ function formatDate(value: string): string {
   return value ? new Date(`${value}T00:00:00`).toLocaleDateString('fr-FR') : 'Non renseignée';
 }
 
-function addPdfSection(pdf: jsPDF, title: string, content: string, y: number, drawHeader?: () => void): number {
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const lines = pdf.splitTextToSize(content || 'Non renseigné', 170) as string[];
-  const requiredHeight = 13 + lines.length * 5;
-
-  if (y + requiredHeight > pageHeight - 18) {
-    pdf.addPage();
-    drawHeader?.();
-    y = 22;
-  }
-
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(11);
-  pdf.setTextColor(91, 33, 182);
-  pdf.text(title, 20, y);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(10);
-  pdf.setTextColor(55, 65, 81);
-  pdf.text(lines, 20, y + 7);
-  return y + requiredHeight;
-}
-
 type PdfContentLine = { text: string };
 
 function splitOversizedPdfLine(pdf: jsPDF, line: string, maxWidth: number): string[] {
@@ -486,10 +464,10 @@ export default function Audit({ onSwitchModule }: { onSwitchModule: (mode: AppMo
                 </div>
               </div>
             <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <TextArea label="Interlocuteurs et leurs rôles" value={activeRendezVous.interlocuteurs} onChange={(value) => updateRendezVous(activeRendezVous.id, 'interlocuteurs', value)} placeholder="Nom - rôle" />
-              <TextArea label="Service(s) concerné(s)" value={activeRendezVous.serviceConcerné} onChange={(value) => updateRendezVous(activeRendezVous.id, 'serviceConcerné', value)} placeholder="Service, spécialité, organisation..." />
-              <TextArea label="Utilisateurs dans le service" value={activeRendezVous.utilisateurs} onChange={(value) => updateRendezVous(activeRendezVous.id, 'utilisateurs', value)} placeholder="Profils, nombre d'utilisateurs, habitudes..." />
-              <TextArea label="Parc actuel" value={activeRendezVous.parcActuel} onChange={(value) => updateRendezVous(activeRendezVous.id, 'parcActuel', value)} placeholder="Équipements en place, ancienneté, usage..." />
+              <div className="lg:col-span-2"><TextArea label="Interlocuteurs et leurs rôles" value={activeRendezVous.interlocuteurs} onChange={(value) => updateRendezVous(activeRendezVous.id, 'interlocuteurs', value)} placeholder="Nom - rôle" /></div>
+              <div className="lg:col-span-2"><TextArea label="Service(s) concerné(s)" value={activeRendezVous.serviceConcerné} onChange={(value) => updateRendezVous(activeRendezVous.id, 'serviceConcerné', value)} placeholder="Service, spécialité, organisation..." /></div>
+              <div className="lg:col-span-2"><TextArea label="Utilisateurs dans le service" value={activeRendezVous.utilisateurs} onChange={(value) => updateRendezVous(activeRendezVous.id, 'utilisateurs', value)} placeholder="Profils, nombre d'utilisateurs, habitudes..." /></div>
+              <div className="lg:col-span-2"><TextArea label="Parc actuel" value={activeRendezVous.parcActuel} onChange={(value) => updateRendezVous(activeRendezVous.id, 'parcActuel', value)} placeholder="Équipements en place, ancienneté, usage..." /></div>
               <div className="lg:col-span-2"><TextArea label="Satisfaction du parc actuel" value={activeRendezVous.satisfaction} onChange={(value) => updateRendezVous(activeRendezVous.id, 'satisfaction', value)} placeholder="Niveau de satisfaction, points appréciés et difficultés..." /></div>
               <div className="lg:col-span-2 rounded-lg bg-white p-5 shadow">
                 <label className="mb-3 block text-base font-bold text-purple-800">Besoins et matériels souhaités</label>

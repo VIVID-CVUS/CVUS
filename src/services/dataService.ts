@@ -783,7 +783,6 @@ export const exportToExcel = (
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(10);
     pdf.setTextColor(50, 50, 50);
-    const avisLineHeight = 5;
     let xAvisVal = 15;
     avisLinesArr.forEach((avisLines, i) => {
       // Promoteur et Indécis : gris, Rétracteur : blanc
