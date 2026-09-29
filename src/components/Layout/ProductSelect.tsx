@@ -125,6 +125,9 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
             className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-purple-600"
           >
             <option value="">-- Sélectionner un produit --</option>
+            <option value="Vivid Explorer 2D">Vivid Explorer 2D</option>
+            <option value="Vivid Advanced">Vivid Advanced</option>
+            <option value="Vivid Focus">Vivid Focus</option>
             <option value="Vivid E95">Vivid E95</option>
             <option value="Vivid E90">Vivid E90</option>
             <option value="Vivid iq">Vivid iq</option>

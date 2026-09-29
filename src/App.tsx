@@ -5,6 +5,7 @@ import ActionButtons from './components/Actions/ActionButtons';
 import Login, { AppMode } from './components/Auth/Login';
 import Comparateur from './components/Comparateur/Comparateur';
 import Audit from './components/Audit/Audit';
+import Evaluation from './components/Evaluation/Evaluation';
 import ClientInfo from './components/Client/ClientInfo';
 import EmailBodyEditor from './components/Client/EmailBodyEditor.tsx';
 import CommercialSelect from './components/Client/PeopleSelect';
@@ -177,9 +178,10 @@ const APP_MODES: { key: AppMode; label: string }[] = [
   { key: 'parc', label: 'Gestion de Parc' },
   { key: 'comparateur', label: 'Comparateur' },
   { key: 'audit', label: 'Audit' },
+  { key: 'evaluation', label: 'Fiche d’évaluation' },
 ];
 
-type ProductMode = Exclude<AppMode, 'comparateur' | 'audit'>;
+type ProductMode = Exclude<AppMode, 'comparateur' | 'audit' | 'evaluation'>;
 
 function Product({ mode = 'demo', onSwitchModule }: { mode?: ProductMode; onSwitchModule: (m: AppMode) => void }): JSX.Element {
   const formRef = useRef<HTMLFormElement>(null);
@@ -803,6 +805,10 @@ function ProductWithAuth(): JSX.Element {
 
   if (appMode === 'audit') {
     return <Audit onSwitchModule={setAppMode} />;
+  }
+
+  if (appMode === 'evaluation') {
+    return <Evaluation onSwitchModule={setAppMode} />;
   }
 
   return <Product mode={appMode} onSwitchModule={setAppMode} />;

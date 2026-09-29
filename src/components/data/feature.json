@@ -60,6 +60,59 @@
     ]
     
   },
+  "Vivid Focus": {
+    "features": [
+      { "id": 1, "name": "Basic Strain Package", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Advanced Strain Package", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "AI Auto Measure -2D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "AI Cardiac Auto Doppler", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "LV Diastolic Function Tool", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 6, "name": "Transportation Mode", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 7, "name": "Battery Scan Mode", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 8, "name": "Smart Stress (EchoStress)", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 9, "name": "Probe Check", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 10, "name": "Vascular Contrast", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 11, "name": "Adv Cardiac Contrast", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+  "Vivid Explorer 2D": {
+    "features": [
+      { "id": 1, "name": "Basic Strain Package", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Advanced Strain Package", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "AI Auto Measure -2D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "AI Cardiac Auto Doppler", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "Myocardial Work", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 6, "name": "LV Diastolic Function Tool", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 7, "name": "TSP Height", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 8, "name": "Transportation Mode", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 9, "name": "Battery Scan Mode", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 10, "name": "Smart Stress (EchoStress)", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 11, "name": "Probe Check", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 12, "name": "Vascular Contrast", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 13, "name": "Adv Cardiac Contrast", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 14, "name": "CARTOSOUND Interface and RemoteUI", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 15, "name": "J&J 2D ICE Catheter Interface", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+  "Vivid Advanced": {
+    "features": [
+      { "id": 1, "name": "Basic Strain Package", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Advanced Strain Package", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "AI Auto Measure -2D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "AI Cardiac Auto Doppler", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "Myocardial Work", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 6, "name": "LV Diastolic Function Tool", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 7, "name": "TSP Height", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 8, "name": "Transportation Mode", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 9, "name": "Battery Scan Mode", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 10, "name": "Smart Stress (EchoStress)", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 11, "name": "Probe Check", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 12, "name": "Vascular Contrast", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 13, "name": "Adv Cardiac Contrast", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 14, "name": "CARTOSOUND Interface and RemoteUI", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 15, "name": "J&J 2D ICE Catheter Interface", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
   "Vivid E90": {
     "features": [
       { "id": 1, "name": "Stress", "presented": false, "appreciated": false, "wanted": false },

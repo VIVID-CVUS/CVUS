@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export type AppMode = 'demo' | 'parc' | 'comparateur' | 'audit';
+export type AppMode = 'demo' | 'parc' | 'comparateur' | 'audit' | 'evaluation';
 
 interface LoginProps {
   onLogin: (password: string, mode: AppMode) => void;
@@ -11,6 +11,7 @@ const MODES: { key: AppMode; label: string; description: string }[] = [
   { key: 'parc', label: 'Gestion de Parc', description: 'Rapport de gestion de parc' },
   { key: 'comparateur', label: 'Comparateur', description: 'Comparer les modèles' },
   { key: 'audit', label: 'Audit', description: 'Créer un rapport d’audit PDF' },
+  { key: 'evaluation', label: 'Fiche d’évaluation', description: 'Créer une fiche d’évaluation' },
 ];
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
