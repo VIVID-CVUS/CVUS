@@ -4,6 +4,7 @@ import featuresDataRaw from '../data/feature.json';
 import sondesDataRaw from '../data/sonde.json';
 import hardwareDataRaw from '../data/hardware.json';
 import connexDataRaw from '../data/connex.json';
+import { ECHOGRAPHES } from '../data/echographes';
 
 type RawItem = { id: number; name: string };
 type RawSection<K extends string> = Record<string, Record<K, RawItem[]>>;
@@ -21,7 +22,7 @@ type TableRow =
   | { kind: 'category'; label: SondeCategory }
   | { kind: 'item'; name: string; category: SondeCategory };
 
-const allDevices = Object.keys(featuresDataRaw as RawSection<'features'>);
+const allDevices = ECHOGRAPHES;
 
 type SectionKey = 'Sondes' | 'Options Software' | 'Hardware' | 'Connectivité';
 
@@ -108,6 +109,7 @@ const APP_MODES: { key: AppMode; label: string }[] = [
   { key: 'parc', label: 'Gestion de Parc' },
   { key: 'comparateur', label: 'Comparateur' },
   { key: 'audit', label: 'Audit' },
+  { key: 'evaluation', label: 'Fiche d’évaluation' },
 ];
 
 interface ComparateurProps {

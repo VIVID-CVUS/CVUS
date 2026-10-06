@@ -73,6 +73,26 @@
       { "id": 14, "name": "P2D Probe Holder", "presented": false, "appreciated": false, "wanted": false }
     ]
   },
+  "Vivid Explorer Dimension": {
+    "hardware": [
+      { "id": 0, "name": "Power Cord", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 1, "name": "ECG Cable", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "eDelivery SW", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "A/N kbd", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "View-X Hardware", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "Battery", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 6, "name": "Gel Warmer", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 7, "name": "Optional 2TB SSD", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 8, "name": "Ext. ECG cable", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 9, "name": "Ped ECG Adapter", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 10, "name": "Neo. ECG Cable", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 11, "name": "DVD Writer Kit", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 12, "name": "Footswitch", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 13, "name": "Storage Box", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 14, "name": "Cable Hook", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 15, "name": "P2D Probe Holder", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
   "Vivid Advanced": {
     "hardware": [
       { "id": 0, "name": "Power Cord", "presented": false, "appreciated": false, "wanted": false },

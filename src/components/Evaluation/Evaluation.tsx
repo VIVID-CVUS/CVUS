@@ -2,6 +2,7 @@ import { type KeyboardEvent, useEffect, useState } from 'react';
 import { jsPDF } from 'jspdf';
 import { AppMode } from '../Auth/Login';
 import logoPng from '../../assets/GE_HealthCare_logo_2023TEST.png';
+import { ECHOGRAPHES } from '../data/echographes';
 
 type EvaluationCriterion = {
   id: string;
@@ -32,27 +33,6 @@ type SavedEvaluation = {
 };
 
 const STORAGE_KEY = 'cvus:saved-evaluations';
-
-const ECHOGRAPHES = [
-  'Vivid Pioneer 4D',
-  'Vivid Pioneer interventional',
-  'Vivid Pioneer 2D',
-  'Vivid Explorer 2D',
-  'Vivid Advanced',
-  'Vivid Focus',
-  'Vivid E95',
-  'Vivid E90',
-  'Vivid S70N Dimension',
-  'Vivid S70N',
-  'Vivid S60N',
-  'Vivid iq',
-  'Vivid T9',
-  'Vivid T8',
-  'Venue',
-  'Venue Go',
-  'Venue Fit',
-  'Venue Sprint',
-];
 
 const ERGONOMIE_CRITERES = [
   "Prise en main générale de l'échographe",

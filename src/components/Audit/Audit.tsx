@@ -57,6 +57,7 @@ const APP_MODES: { key: AppMode; label: string }[] = [
   { key: 'parc', label: 'Gestion de Parc' },
   { key: 'comparateur', label: 'Comparateur' },
   { key: 'audit', label: 'Audit' },
+  { key: 'evaluation', label: 'Fiche d’évaluation' },
 ];
 
 function formatDate(value: string): string {

@@ -33,14 +33,19 @@
       { "id": 5, "name": "Chamber QuantificationPackage", "presented": false, "appreciated": false, "wanted": false },
       { "id": 6, "name": "4D Auto LAQ", "presented": false, "appreciated": false, "wanted": false },
       { "id": 7, "name": "4D Strain and LV Mass", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 8, "name": "Radiant Flow", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 9, "name": "Stress", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 10, "name": "Adv. Contrast Imaging", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 11, "name": "Vascular Contrast", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 12, "name": "BSI", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 13, "name": "Myocardial Work", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 14, "name": "CT Fusion Live", "presented": false, "appreciated": false, "wanted": false },
-      { "id": 19, "name": "4D ICE", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 8, "name": "Structural Heart Package", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 9, "name": "4D Vision Package", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 10, "name": "4D Markers", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 11, "name": "Silhouette", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 12, "name": "Flexi Light", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 13, "name": "Radiant Flow", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 14, "name": "Stress", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 15, "name": "Adv. Contrast Imaging", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 16, "name": "Vascular Contrast", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 17, "name": "BSI", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 18, "name": "Myocardial Work", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 19, "name": "CT Fusion Live", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 20, "name": "4D ICE", "presented": false, "appreciated": false, "wanted": false },
       { "id": 21, "name": "Probe Check", "presented": false, "appreciated": false, "wanted": false }
     ]
     
@@ -92,6 +97,33 @@
       { "id": 13, "name": "Adv Cardiac Contrast", "presented": false, "appreciated": false, "wanted": false },
       { "id": 14, "name": "CARTOSOUND Interface and RemoteUI", "presented": false, "appreciated": false, "wanted": false },
       { "id": 15, "name": "J&J 2D ICE Catheter Interface", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+  "Vivid Explorer Dimension": {
+    "features": [
+      { "id": 1, "name": "Basic Strain Package", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Advanced Strain Package", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "Valve Quantification Package", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "Structural Heart Package", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "AI Auto Measure -2D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 6, "name": "AI Cardiac Auto Doppler", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 7, "name": "Myocardial Work", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 8, "name": "LV Diastolic Function Tool", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 9, "name": "TSP Height", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 10, "name": "Transportation Mode", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 11, "name": "Battery Scan Mode", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 12, "name": "Smart Stress (EchoStress)", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 13, "name": "Probe Check", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 14, "name": "Vascular Contrast", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 15, "name": "Adv Cardiac Contrast", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 16, "name": "CARTOSOUND Interface and RemoteUI", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 17, "name": "J&J 2D ICE Catheter Interface", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 18, "name": "NuVision 4D ICE V2 Enable", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 19, "name": "FlexiLight", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 20, "name": "4D Auto TVQ", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 21, "name": "4D Auto LAQ", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 22, "name": "4D Auto RVQ", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 23, "name": "4D Markers", "presented": false, "appreciated": false, "wanted": false }
     ]
   },
   "Vivid Advanced": {
