@@ -3,6 +3,7 @@ import sondesDataRaw from '../data/sonde.json';
 import featuresDataRaw from '../data/feature.json';
 import hardwareDataRaw from '../data/hardware.json';
 import softwareDataRaw from '../data/connex.json';
+import { ECHOGRAPHES } from '../data/echographes';
 import { DeviceData } from '../type/types';
 
 type RawDeviceItem = {
@@ -132,21 +133,9 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
             className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-purple-600"
           >
             <option value="">-- Sélectionner un produit --</option>
-            <option value="Vivid Pioneer 4D">Vivid Pioneer 4D</option>
-            <option value="Vivid Pioneer interventional">Vivid Pioneer interventional</option>
-            <option value="Vivid Pioneer 2D">Vivid Pioneer 2D</option>
-            <option value="Vivid E95">Vivid E95</option>
-            <option value="Vivid E90">Vivid E90</option>
-            <option value="Vivid S70N Dimension">Vivid S70N Dimension</option>
-            <option value="Vivid S70N">Vivid S70N</option>
-            <option value="Vivid S60N">Vivid S60N</option>
-            <option value="Vivid iq">Vivid iq</option>
-            <option value="Vivid T9">Vivid T9</option>
-            <option value="Vivid T8">Vivid T8</option>
-            <option value="Venue">Venue</option>
-            <option value="Venue Go">Venue Go</option>
-            <option value="Venue Fit">Venue Fit</option>
-            <option value="Venue Sprint">Venue Sprint</option>
+            {ECHOGRAPHES.map((device) => (
+              <option key={device} value={device}>{device}</option>
+            ))}
           </select>
         </div>
       </div>

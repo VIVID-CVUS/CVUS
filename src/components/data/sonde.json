@@ -65,6 +65,84 @@
 ]
 
   },
+  "Vivid Focus": {
+    "sondes": [
+  { "id": 1, "name": "4Sc-RS", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 2, "name": "6S-RS", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 3, "name": "12S-RS", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 4, "name": "9L-RS", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 5, "name": "12L-RS", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 6, "name": "L4-20t-RS", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 7, "name": "4C-RS", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 8, "name": "8C-RS", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 9, "name": "C1-5-RS", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 10, "name": "IC9-RS", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 11, "name": "L8-18i-RS", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 12, "name": "P2D-RS", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 13, "name": "6Tc-RS", "presented": false, "appreciated": false, "wanted": false }
+]
+
+  },
+  "Vivid Explorer 2D": {
+    "sondes": [
+  { "id": 1, "name": "4Vc-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 2, "name": "M5Sc-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 3, "name": "6Sc-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 4, "name": "12S-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 5, "name": "9L-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 6, "name": "11L-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 7, "name": "C1-6-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 8, "name": "C2-9-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 9, "name": "C3-10-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 10, "name": "IC5-9-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 11, "name": "L8-18i-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 12, "name": "6VT-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 13, "name": "9VT-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 14, "name": "P2D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 15, "name": "P6D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 16, "name": "CRYSTAL ICE Cord-RS", "presented": false, "appreciated": false, "wanted": false }
+]
+
+  },
+  "Vivid Explorer Dimension": {
+    "sondes": [
+      { "id": 1, "name": "4Vc-D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "M5Sc-D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "6Sc-D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "12S-D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 5, "name": "9L-D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 6, "name": "11L-D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 7, "name": "C1-6-D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 8, "name": "C2-9-D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 9, "name": "C3-10-D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 10, "name": "IC5-9-D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 11, "name": "L8-18i-D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 12, "name": "6VT-D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 13, "name": "9VT-D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 14, "name": "P2D", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 15, "name": "P6D", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+  "Vivid Advanced": {
+    "sondes": [
+  { "id": 1, "name": "M5Sc-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 2, "name": "6Sc-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 3, "name": "12S-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 4, "name": "9L-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 5, "name": "11L-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 6, "name": "C1-6-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 7, "name": "C2-9-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 8, "name": "C3-10-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 9, "name": "IC5-9-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 10, "name": "L8-18i-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 11, "name": "6VT-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 12, "name": "9VT-D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 13, "name": "P2D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 14, "name": "P6D", "presented": false, "appreciated": false, "wanted": false },
+  { "id": 15, "name": "CRYSTAL ICE Cord-RS", "presented": false, "appreciated": false, "wanted": false }
+]
+
+  },
   "Vivid E90": {
     "sondes": [
   { "id": 1, "name": "4Vc-D", "presented": false, "appreciated": false, "wanted": false },

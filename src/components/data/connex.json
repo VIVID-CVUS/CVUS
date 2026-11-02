@@ -34,6 +34,38 @@
       { "id": 5, "name": "BW printer paper", "presented": false, "appreciated": false, "wanted": false }
     ]
   },
+  "Vivid Focus": {
+    "accessories": [
+      { "id": 1, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Wifi", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "B&W V.Printer", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "Network Breakaway Adapter", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+  "Vivid Explorer 2D": {
+    "accessories": [
+      { "id": 1, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Wifi", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "B&W V.Printer", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "Network Breakaway Adapter", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+  "Vivid Explorer Dimension": {
+    "accessories": [
+      { "id": 1, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Wifi", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "B&W V.Printer", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "Network Breakaway Adapter", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
+  "Vivid Advanced": {
+    "accessories": [
+      { "id": 1, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 2, "name": "Wifi", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 3, "name": "B&W V.Printer", "presented": false, "appreciated": false, "wanted": false },
+      { "id": 4, "name": "Network Breakaway Adapter", "presented": false, "appreciated": false, "wanted": false }
+    ]
+  },
   "Vivid E95": {
     "accessories": [
       { "id": 1, "name": "Remote Viewing", "presented": false, "appreciated": false, "wanted": false },
